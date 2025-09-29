@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Vehicles</title>
+    <style>
+        form {
+            margin-bottom: 20px;
+        }
+        .form-row {
+            margin: 8px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 5px;
+            width: 200px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<h1>Vehicle List</h1>
+
+<!-- Ekleme Formu -->
+<form th:action="@{/vehicles/add}" th:object="${vehicle}" method="post">
+
+    <div class="form-row">
+        <label>Brand:</label>
+        <input type="text" th:field="*{brand}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Model:</label>
+        <input type="text" th:field="*{model}"/>
+    </div>
+
+    <div class="form-row">
+        <label>City:</label>
+        <input type="text" th:field="*{city}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Plate:</label>
+        <input type="text" th:field="*{plate}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Fuel Type:</label>
+        <select th:field="*{fuelType}">
+            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.FuelType).values()}"
+                    th:value="${ft}" th:text="${ft}"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label>Transmission:</label>
+        <select th:field="*{transmission}">
+            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.Transmission).values()}"
+                    th:value="${tr}" th:text="${tr}"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label>Status:</label>
+        <select th:field="*{status}">
+            <option th:each="st : ${T(com.sukru.vehiclerental.entity.VehicleStatus).values()}"
+                    th:value="${st}" th:text="${st}"></option>
+        </select>
+    </div>
+
+    <button type="submit">Add Vehicle</button>
+</form>
+
+<hr/>
+
+<!-- Arac Listesi -->
+<table>
+    <tr>
+        <th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
+        <th>Fuel</th><th>Transmission</th><th>Status</th>
+        <th>Created</th><th>Updated</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="v : ${vehicles}">
+        <td th:text="${v.brand}"></td>
+        <td th:text="${v.model}"></td>
+        <td th:text="${v.city}"></td>
+        <td th:text="${v.plate}"></td>
+        <td th:text="${v.fuelType}"></td>
+        <td th:text="${v.transmission}"></td>
+        <td th:text="${v.status}"></td>
+        <td th:text="${#temporals.format(v.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td>
+            <a th:href="@{'/vehicles/edit/' + ${v.id}}">Edit</a> |
+            <a th:href="@{'/vehicles/delete/' + ${v.id}}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

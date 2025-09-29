@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Vehicle</title>
+    <style>
+        .form-row {
+            margin: 8px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+<h1>Edit Vehicle</h1>
+
+<form th:action="@{/vehicles/update}" th:object="${vehicle}" method="post">
+    <!-- ID gizli alan -->
+    <input type="hidden" th:field="*{id}"/>
+
+    <div class="form-row">
+        <label>Brand:</label>
+        <input type="text" th:field="*{brand}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Model:</label>
+        <input type="text" th:field="*{model}"/>
+    </div>
+
+    <div class="form-row">
+        <label>City:</label>
+        <input type="text" th:field="*{city}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Plate:</label>
+        <input type="text" th:field="*{plate}"/>
+    </div>
+
+    <div class="form-row">
+        <label>Fuel Type:</label>
+        <select th:field="*{fuelType}">
+            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.FuelType).values()}"
+                    th:value="${ft}" th:text="${ft}"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label>Transmission:</label>
+        <select th:field="*{transmission}">
+            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.Transmission).values()}"
+                    th:value="${tr}" th:text="${tr}"></option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label>Status:</label>
+        <select th:field="*{status}">
+            <option th:each="st : ${T(com.sukru.vehiclerental.entity.VehicleStatus).values()}"
+                    th:value="${st}" th:text="${st}"></option>
+        </select>
+    </div>
+
+    <button type="submit">Update Vehicle</button>
+</form>
+
+<hr/>
+
+<a th:href="@{/vehicles}">Back to List</a>
+
+</body>
+</html>
