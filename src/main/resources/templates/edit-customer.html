@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Customer</title>
+    <style>
+        form div { margin-bottom: 8px; }
+        label { display: inline-block; width: 100px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Edit Customer</h1>
+
+<form id="editForm" onsubmit="updateCustomer(event)">
+    <input type="hidden" id="id"/>
+
+    <div>
+        <label>First Name:</label>
+        <input type="text" id="firstName"/>
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <input type="text" id="lastName"/>
+    </div>
+    <div>
+        <label>Email:</label>
+        <input type="email" id="email"/>
+    </div>
+    <div>
+        <label>Phone:</label>
+        <input type="text" id="phone"/>
+    </div>
+
+    <button type="submit">Update Customer</button>
+</form>
+
+<hr/>
+<a href="/customers">Back to Customers</a>
+
+<script>
+async function loadCustomer() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    if (!id) {
+        alert("No customer id provided");
+        return;
+    }
+
+    const response = await fetch('/customers/api');
+    const data = await response.json();
+    const c = data.find(cust => cust.id === id);
+
+    if (c) {
+        document.getElementById('id').value = c.id;
+        document.getElementById('firstName').value = c.firstName;
+        document.getElementById('lastName').value = c.lastName;
+        document.getElementById('email').value = c.email;
+        document.getElementById('phone').value = c.phone;
+    }
+}
+
+async function updateCustomer(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('id').value;
+    const updated = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value
+    };
+
+    await fetch(`/customers/api/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+    });
+
+    window.location.href = "/customers";
+}
+
+window.onload = loadCustomer;
+</script>
+</body>
+</html>

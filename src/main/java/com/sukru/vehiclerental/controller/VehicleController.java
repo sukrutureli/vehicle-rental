@@ -21,68 +21,26 @@ public class VehicleController {
         this.vehicleRepo = vehicleRepo;
     }
 
-    // HTML
-
-    // Listeleme
     @GetMapping
-    public String listHtml(Model model) {
-        List<Vehicle> vehicles = vehicleRepo.findAll();
-        model.addAttribute("vehicles", vehicles);
-        model.addAttribute("vehicle", new Vehicle()); // form icin bos obje
-        return "vehicles";
-    }
-
-    // Ekleme
-    @PostMapping("/add")
-    public String addVehicle(@ModelAttribute Vehicle vehicle) {
-        LocalDateTime now = LocalDateTime.now();
-        vehicle.setCreatedAt(now);
-        vehicle.setUpdatedAt(now);
-        vehicleRepo.save(vehicle);
-        return "redirect:/vehicles";
-    }
-
-    // Silme
-    @GetMapping("/delete/{id}")
-    public String deleteVehicle(@PathVariable UUID id) {
-        if (vehicleRepo.existsById(id)) {
-            vehicleRepo.deleteById(id);
-        }
-        return "redirect:/vehicles";
-    }
-
-    // Guncelleme sayfasi
-    @GetMapping("/edit/{id}")
-    public String editForm(@PathVariable UUID id, Model model) {
-        return vehicleRepo.findById(id)
-                .map(vehicle -> {
-                    model.addAttribute("vehicle", vehicle);
-                    return "edit-vehicle";
-                })
-                .orElse("redirect:/vehicles"); // yoksa listeye don
-    }
-
-    // Guncelleme islemi
-    @PostMapping("/update")
-    public String updateVehicle(@ModelAttribute Vehicle vehicle) {
-        vehicleRepo.findById(vehicle.getId()).ifPresent(existing -> {
-            vehicle.setCreatedAt(existing.getCreatedAt()); // eski createdAt korunur
-        });
-        vehicle.setUpdatedAt(LocalDateTime.now());
-        vehicleRepo.save(vehicle); // aynı ID varsa update yapar
-        return "redirect:/vehicles";
+    public String vehiclesPage() {
+        return "vehicles"; // vehicles.html
+    } 
+    
+    @GetMapping("/edit")
+    public String editPage() {
+        return "edit-vehicle"; // edit-vehicle.html
     }
 
     // API
 
-    // Listele (JSON)
+    // Listele
     @GetMapping("/api")
     @ResponseBody
     public List<Vehicle> listVehiclesApi() {
         return vehicleRepo.findAll();
     }
 
-    // Ekle (JSON POST)
+    // Ekle
     @PostMapping("/api")
     @ResponseBody
     public Vehicle addVehicleApi(@RequestBody Vehicle vehicle) {
@@ -92,7 +50,7 @@ public class VehicleController {
         return vehicleRepo.save(vehicle);
     }
 
-    // Guncelle (JSON PUT)
+    // Guncelle
     @PutMapping("/api/{id}")
     @ResponseBody
     public ResponseEntity<Vehicle> updateVehicleApi(@PathVariable("id") UUID id,
@@ -107,7 +65,7 @@ public class VehicleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Sil (JSON DELETE)
+    // Sil
     @DeleteMapping("/api/{id}")
     @ResponseBody
     public ResponseEntity<Void> deleteVehicleApi(@PathVariable UUID id) {

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rentals</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        form div { margin-bottom: 8px; }
+        label { display: inline-block; width: 120px; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    </style>
+</head>
+<body>
+<h1>Rental List</h1>
+
+<!-- Ekleme Formu -->
+<form onsubmit="addRental(); return false;">
+    <div>
+        <label>Vehicle ID:</label>
+        <input type="text" id="vehicleId" required/>
+    </div>
+    <div>
+        <label>Customer ID:</label>
+        <input type="text" id="customerId" required/>
+    </div>
+    <div>
+        <label>Start Date:</label>
+        <input type="datetime-local" id="startDate" required/>
+    </div>
+    <div>
+        <label>End Date:</label>
+        <input type="datetime-local" id="endDate" required/>
+    </div>
+    <div>
+        <label>Status:</label>
+        <select id="status" required>
+	        <option value="ACTIVE">ACTIVE</option>
+	        <option value="COMPLETED">COMPLETED</option>
+	        <option value="CANCELLED">CANCELLED</option>
+	    </select>
+    </div>
+    <button type="submit">Add Rental</button>
+</form>
+
+<hr/>
+
+<!-- Liste -->
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Vehicle</th>
+            <th>Customer</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="rentalsTable"></tbody>
+</table>
+
+<hr/>
+<a href="/">Back to Index</a>
+
+<script>
+async function loadRentals() {
+    const response = await fetch('/rentals/api');
+    const data = await response.json();
+
+    const table = document.getElementById('rentalsTable');
+    table.innerHTML = '';
+
+    data.forEach(r => {
+        const row = `<tr>
+            <td>${r.id}</td>
+            <td>${r.vehicleId}</td>
+            <td>${r.customerId}</td>
+            <td>${r.startDate}</td>
+            <td>${r.endDate}</td>
+            <td>${r.status}</td>
+            <td>${r.createdAt}</td>
+            <td>${r.updatedAt}</td>
+            <td>
+	            <button onclick="completeRental('${r.id}')">Complete</button>
+	            <button onclick="cancelRental('${r.id}')">Cancel</button>
+	        </td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
+async function addRental() {
+    const rental = {
+        vehicleId: document.getElementById('vehicleId').value,
+        customerId: document.getElementById('customerId').value,
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+        status: document.getElementById('status').value
+    };
+
+    await fetch('/rentals/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rental)
+    });
+
+    loadRentals();
+}
+
+async function completeRental(id) {
+    await fetch(`/rentals/api/${id}/complete`, { method: 'PUT' });
+    loadRentals();
+}
+
+async function cancelRental(id) {
+    await fetch(`/rentals/api/${id}/cancel`, { method: 'PUT' });
+    loadRentals();
+}
+
+window.onload = loadRentals;
+</script>
+</body>
+</html>

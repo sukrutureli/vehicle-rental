@@ -1,116 +1,154 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Vehicles</title>
     <style>
-        form {
-            margin-bottom: 20px;
-        }
-        .form-row {
-            margin: 8px 0;
-        }
-        label {
-            display: inline-block;
-            width: 120px;
-            font-weight: bold;
-        }
-        input, select {
-            padding: 5px;
-            width: 200px;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #999;
-            padding: 6px;
-            text-align: left;
-        }
-        th {
-            background-color: #eee;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { margin-bottom: 20px; }
+        .form-row { margin: 8px 0; }
+        label { display: inline-block; width: 120px; font-weight: bold; }
+        input, select { padding: 5px; width: 200px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #999; padding: 6px; }
+        th { background-color: #eee; }
     </style>
 </head>
 <body>
 <h1>Vehicle List</h1>
 
 <!-- Ekleme Formu -->
-<form th:action="@{/vehicles/add}" th:object="${vehicle}" method="post">
-
+<form onsubmit="addVehicle(); return false;">
     <div class="form-row">
         <label>Brand:</label>
-        <input type="text" th:field="*{brand}"/>
+        <input type="text" id="brand" required/>
     </div>
-
     <div class="form-row">
         <label>Model:</label>
-        <input type="text" th:field="*{model}"/>
+        <input type="text" id="model" required/>
     </div>
-
     <div class="form-row">
         <label>City:</label>
-        <input type="text" th:field="*{city}"/>
+        <input type="text" id="city" required/>
     </div>
-
     <div class="form-row">
         <label>Plate:</label>
-        <input type="text" th:field="*{plate}"/>
+        <input type="text" id="plate" required/>
     </div>
-
+    <div class="form-row">
+        <label>Price:</label>
+        <input type="number" id="dailyPrice" required/>
+    </div>
     <div class="form-row">
         <label>Fuel Type:</label>
-        <select th:field="*{fuelType}">
-            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.enums.FuelType).values()}"
-                    th:value="${ft}" th:text="${ft}"></option>
-        </select>
+        <select id="fuelType" required>
+	        <option value="GASOLINE">GASOLINE</option>
+	        <option value="DIESEL">DIESEL</option>
+	        <option value="ELECTRIC">ELECTRIC</option>
+	        <option value="HYBRID">HYBRID</option>
+	    </select>
     </div>
-
     <div class="form-row">
         <label>Transmission:</label>
-        <select th:field="*{transmission}">
-            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.enums.Transmission).values()}"
-                    th:value="${tr}" th:text="${tr}"></option>
-        </select>
+        <select id="transmission" required>
+	        <option value="MANUAL">MANUAL</option>
+	        <option value="AUTOMATIC">AUTOMATIC</option>
+	    </select>
     </div>
-
     <div class="form-row">
         <label>Status:</label>
-        <select th:field="*{status}">
-            <option th:each="st : ${T(com.sukru.vehiclerental.entity.enums.VehicleStatus).values()}"
-                    th:value="${st}" th:text="${st}"></option>
-        </select>
+        <select id="status" required>
+	        <option value="AVAILABLE">AVAILABLE</option>
+	        <option value="RENTED">RENTED</option>
+	        <option value="MAINTENANCE">MAINTENANCE</option>
+	    </select>
     </div>
-
     <button type="submit">Add Vehicle</button>
 </form>
 
 <hr/>
 
-<!-- Arac Listesi -->
+<!-- Araç Listesi -->
 <table>
+    <thead>
     <tr>
-        <th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
-        <th>Fuel</th><th>Transmission</th><th>Status</th>
-        <th>Created</th><th>Updated</th>
-        <th>Actions</th>
+        <th>ID</th><th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
+        <th>Price</th><th>Fuel</th><th>Transmission</th><th>Status</th>
+        <th>Created</th><th>Updated</th><th>Actions</th>
     </tr>
-    <tr th:each="v : ${vehicles}">
-        <td th:text="${v.brand}"></td>
-        <td th:text="${v.model}"></td>
-        <td th:text="${v.city}"></td>
-        <td th:text="${v.plate}"></td>
-        <td th:text="${v.fuelType}"></td>
-        <td th:text="${v.transmission}"></td>
-        <td th:text="${v.status}"></td>
-        <td th:text="${#temporals.format(v.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-        <td th:text="${#temporals.format(v.updatedAt, 'yyyy-MM-dd HH:mm')}"></td>
-        <td>
-            <a th:href="@{'/vehicles/edit/' + ${v.id}}">Edit</a> |
-            <a th:href="@{'/vehicles/delete/' + ${v.id}}">Delete</a>
-        </td>
-    </tr>
+    </thead>
+    <tbody id="vehiclesTable"></tbody>
 </table>
 
+<a href="/">Back to Index</a>
+
+<script>
+async function loadVehicles() {
+    const response = await fetch('/vehicles/api');
+    const data = await response.json();
+
+    const table = document.getElementById('vehiclesTable');
+    table.innerHTML = '';
+
+    data.forEach(v => {
+        const row = `<tr>
+            <td>${v.id}</td>
+            <td>${v.brand}</td>
+            <td>${v.model}</td>
+            <td>${v.city}</td>
+            <td>${v.plate}</td>
+            <td>${v.dailyPrice}</td>
+            <td>${v.fuelType}</td>
+            <td>${v.transmission}</td>
+            <td>${v.status}</td>
+            <td>${v.createdAt || ''}</td>
+            <td>${v.updatedAt || ''}</td>
+            <td>
+                <a href="/vehicles/edit?id=${v.id}">Edit</a> 
+                <button onclick="deleteVehicle('${v.id}')">Delete</button>
+                <button onclick="loadLocation('${v.id}')">Location</button>
+            </td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
+async function addVehicle() {
+    const vehicle = {
+        brand: document.getElementById('brand').value,
+        model: document.getElementById('model').value,
+        city: document.getElementById('city').value,
+        plate: document.getElementById('plate').value,
+        dailyPrice: document.getElementById('dailyPrice').value,
+        fuelType: document.getElementById('fuelType').value,
+        transmission: document.getElementById('transmission').value,
+        status: document.getElementById('status').value
+    };
+
+    await fetch('/vehicles/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vehicle)
+    });
+
+    loadVehicles();
+}
+
+async function deleteVehicle(id) {
+    await fetch(`/vehicles/api/${id}`, { method: 'DELETE' });
+    loadVehicles();
+}
+
+async function loadLocation(vehicleId) {
+    const response = await fetch(`/api/vehicles/${vehicleId}/location/latest`);
+    if (response.ok) {
+        const loc = await response.json();
+        alert(`Vehicle ${vehicleId}\nLat: ${loc.lat}, Lon: ${loc.lon}, Time: ${loc.reportedAt}`);
+    } else {
+        alert("No location found for this vehicle.");
+    }
+}
+
+window.onload = loadVehicles;
+</script>
 </body>
 </html>

@@ -1,79 +1,117 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Edit Vehicle</title>
     <style>
-        .form-row {
-            margin: 8px 0;
-        }
-        label {
-            display: inline-block;
-            width: 120px;
-            font-weight: bold;
-        }
-        input, select {
-            padding: 5px;
-            width: 200px;
-        }
+        .form-row { margin: 8px 0; }
+        label { display: inline-block; width: 120px; font-weight: bold; }
+        input, select { padding: 5px; width: 200px; }
     </style>
 </head>
 <body>
 <h1>Edit Vehicle</h1>
 
-<form th:action="@{/vehicles/update}" th:object="${vehicle}" method="post">
-    <!-- ID gizli alan -->
-    <input type="hidden" th:field="*{id}"/>
+<form onsubmit="updateVehicle(); return false;">
+    <input type="hidden" id="id"/>
 
     <div class="form-row">
         <label>Brand:</label>
-        <input type="text" th:field="*{brand}"/>
+        <input type="text" id="brand" required/>
     </div>
-
     <div class="form-row">
         <label>Model:</label>
-        <input type="text" th:field="*{model}"/>
+        <input type="text" id="model" required/>
     </div>
-
     <div class="form-row">
         <label>City:</label>
-        <input type="text" th:field="*{city}"/>
+        <input type="text" id="city" required/>
     </div>
-
     <div class="form-row">
         <label>Plate:</label>
-        <input type="text" th:field="*{plate}"/>
+        <input type="text" id="plate" required/>
     </div>
-
+    <div class="form-row">
+        <label>Price:</label>
+        <input type="number" id="dailyPrice" required/>
+    </div>
     <div class="form-row">
         <label>Fuel Type:</label>
-        <select th:field="*{fuelType}">
-            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.enums.FuelType).values()}"
-                    th:value="${ft}" th:text="${ft}"></option>
-        </select>
+        <select id="fuelType" required>
+	        <option value="GASOLINE">GASOLINE</option>
+	        <option value="DIESEL">DIESEL</option>
+	        <option value="ELECTRIC">ELECTRIC</option>
+	        <option value="HYBRID">HYBRID</option>
+	    </select>
     </div>
-
     <div class="form-row">
         <label>Transmission:</label>
-        <select th:field="*{transmission}">
-            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.enums.Transmission).values()}"
-                    th:value="${tr}" th:text="${tr}"></option>
-        </select>
+        <select id="transmission" required>
+	        <option value="MANUAL">MANUAL</option>
+	        <option value="AUTOMATIC">AUTOMATIC</option>
+	    </select>
     </div>
-
     <div class="form-row">
         <label>Status:</label>
-        <select th:field="*{status}">
-            <option th:each="st : ${T(com.sukru.vehiclerental.entity.enums.VehicleStatus).values()}"
-                    th:value="${st}" th:text="${st}"></option>
-        </select>
+        <select id="status" required>
+	        <option value="AVAILABLE">AVAILABLE</option>
+	        <option value="RENTED">RENTED</option>
+	        <option value="MAINTENANCE">MAINTENANCE</option>
+	    </select>
     </div>
 
     <button type="submit">Update Vehicle</button>
 </form>
 
 <hr/>
+<a href="/vehicles">Back to List</a>
 
-<a th:href="@{/vehicles}">Back to List</a>
+<script>
+async function loadVehicle() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (!id) return;
 
+    const response = await fetch(`/vehicles/api`);
+    const data = await response.json();
+    const v = data.find(x => x.id === id);
+
+    if (v) {
+        document.getElementById('id').value = v.id;
+        document.getElementById('brand').value = v.brand;
+        document.getElementById('model').value = v.model;
+        document.getElementById('city').value = v.city;
+        document.getElementById('plate').value = v.plate;
+        document.getElementById('dailyPrice').value = v.dailyPrice;
+        document.getElementById('fuelType').value = v.fuelType;
+        document.getElementById('transmission').value = v.transmission;
+        document.getElementById('status').value = v.status;
+    }
+}
+
+async function updateVehicle() {
+    const id = document.getElementById('id').value;
+
+    const updated = {
+        brand: document.getElementById('brand').value,
+        model: document.getElementById('model').value,
+        city: document.getElementById('city').value,
+        plate: document.getElementById('plate').value,
+        dailyPrice: document.getElementById('dailyPrice').value,
+        fuelType: document.getElementById('fuelType').value,
+        transmission: document.getElementById('transmission').value,
+        status: document.getElementById('status').value
+    };
+
+    await fetch(`/vehicles/api/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+    });
+
+    window.location.href = "/vehicles";
+}
+
+window.onload = loadVehicle;
+</script>
 </body>
 </html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Latest Vehicle Locations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #999;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+<h1>All Vehicles - Latest Locations</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Vehicle</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Reported At</th>
+        </tr>
+    </thead>
+    <tbody id="locationsTable"></tbody>
+</table>
+
+<a th:href="@{/}">Back to Index</a>
+
+<script>
+    async function loadLocations() {
+        const response = await fetch('/api/vehicles/locations/latest');
+        const data = await response.json();
+
+        const table = document.getElementById('locationsTable');
+        table.innerHTML = '';
+
+        data.forEach(loc => {
+            const row = `<tr>
+                <td>${loc.vehicleId}</td>
+                <td>${loc.lat}</td>
+                <td>${loc.lon}</td>
+                <td>${loc.reportedAt}</td>
+            </tr>`;
+            table.innerHTML += row;
+        });
+    }
+
+    window.onload = loadLocations;
+</script>
+</body>
+</html>

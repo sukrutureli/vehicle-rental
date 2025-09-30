@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customers</title>
+    <style>
+        form div {
+            margin-bottom: 8px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+<h1>Customer List</h1>
+
+<!-- Ekleme Formu -->
+<form onsubmit="addCustomer(); return false;">
+    <div>
+        <label>First Name:</label>
+        <input type="text" id="firstName" required/>
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <input type="text" id="lastName" required/>
+    </div>
+    <div>
+        <label>Email:</label>
+        <input type="email" id="email" required/>
+    </div>
+    <div>
+        <label>Phone:</label>
+        <input type="text" id="phone" required/>
+    </div>
+    <button type="submit">Add Customer</button>
+</form>
+
+<hr/>
+
+<!-- Liste -->
+<table>
+    <thead>
+        <tr>
+            <th>ID</th><th>First</th><th>Last</th>
+            <th>Email</th><th>Phone</th><th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="customersTable"></tbody>
+</table>
+
+<hr/>
+<a href="/">Back to Index</a>
+
+<script>
+async function loadCustomers() {
+    const response = await fetch('/customers/api');
+    const data = await response.json();
+
+    const table = document.getElementById('customersTable');
+    table.innerHTML = '';
+
+    data.forEach(c => {
+        const row = `<tr>
+            <td>${c.id}</td>
+            <td>${c.firstName}</td>
+            <td>${c.lastName}</td>
+            <td>${c.email}</td>
+            <td>${c.phone}</td>
+            <td>
+                <a href="/customers/edit?id=${c.id}">Edit</a> |
+                <button onclick="deleteCustomer('${c.id}')">Delete</button>
+            </td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
+async function addCustomer() {
+    const customer = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value
+    };
+
+    await fetch('/customers/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customer)
+    });
+
+    loadCustomers();
+}
+
+async function deleteCustomer(id) {
+    await fetch(`/customers/api/${id}`, { method: 'DELETE' });
+    loadCustomers();
+}
+
+window.onload = loadCustomers;
+</script>
+</body>
+</html>

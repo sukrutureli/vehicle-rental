@@ -21,18 +21,44 @@ public class VehicleLocation {
 
     private LocalDateTime reportedAt;
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+	public UUID getId() {
+		return id;
+	}
 
-    public UUID getVehicleId() { return vehicleId; }
-    public void setVehicleId(UUID vehicleId) { this.vehicleId = vehicleId; }
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
-    public Double getLat() { return lat; }
-    public void setLat(Double lat) { this.lat = lat; }
+	public UUID getVehicleId() {
+		return vehicleId;
+	}
 
-    public Double getLon() { return lon; }
-    public void setLon(Double lon) { this.lon = lon; }
+	public void setVehicleId(UUID vehicleId) {
+		this.vehicleId = vehicleId;
+	}
 
-    public LocalDateTime getReportedAt() { return reportedAt; }
-    public void setReportedAt(LocalDateTime reportedAt) { this.reportedAt = reportedAt; }
+	public Double getLat() {
+		return lat;
+	}
+
+	public void setLat(Double lat) {
+		this.lat = lat;
+	}
+
+	public Double getLon() {
+		return lon;
+	}
+
+	public void setLon(Double lon) {
+		this.lon = lon;
+	}
+
+	public LocalDateTime getReportedAt() {
+		return reportedAt;
+	}
+
+	public void setReportedAt(LocalDateTime reportedAt) {
+		this.reportedAt = reportedAt;
+	}
+    
 }

@@ -2,6 +2,8 @@ package com.sukru.vehiclerental.entity;
 
 import javax.persistence.*;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.sukru.vehiclerental.entity.enums.RentalStatus;
 
 import java.time.LocalDateTime;
@@ -23,8 +25,11 @@ public class Rental {
     // Vehicle UUID
     @Column(name = "vehicle_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID vehicleId;
-
+    
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDate;
+    
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)

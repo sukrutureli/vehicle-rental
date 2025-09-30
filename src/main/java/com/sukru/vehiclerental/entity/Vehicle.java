@@ -28,6 +28,7 @@ public class Vehicle {
     private String brand;
     private String model;
     private String city;
+    private Integer dailyPrice;
 
     @Enumerated(EnumType.STRING)
     private VehicleStatus status;
@@ -43,33 +44,92 @@ public class Vehicle {
 
     public Vehicle() { }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+	public UUID getId() {
+		return id;
+	}
 
-    public String getPlate() { return plate; }
-    public void setPlate(String plate) { this.plate = plate; }
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
-    public String getBrand() { return brand; }
-    public void setBrand(String brand) { this.brand = brand; }
+	public String getPlate() {
+		return plate;
+	}
 
-    public String getModel() { return model; }
-    public void setModel(String model) { this.model = model; }
+	public void setPlate(String plate) {
+		this.plate = plate;
+	}
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+	public String getBrand() {
+		return brand;
+	}
 
-    public VehicleStatus getStatus() { return status; }
-    public void setStatus(VehicleStatus status) { this.status = status; }
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
 
-    public Transmission getTransmission() { return transmission; }
-    public void setTransmission(Transmission transmission) { this.transmission = transmission; }
+	public String getModel() {
+		return model;
+	}
 
-    public FuelType getFuelType() { return fuelType; }
-    public void setFuelType(FuelType fuelType) { this.fuelType = fuelType; }
+	public void setModel(String model) {
+		this.model = model;
+	}
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+	public String getCity() {
+		return city;
+	}
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public Integer getDailyPrice() {
+		return dailyPrice;
+	}
+
+	public void setDailyPrice(Integer dailyPrice) {
+		this.dailyPrice = dailyPrice;
+	}
+
+	public VehicleStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(VehicleStatus status) {
+		this.status = status;
+	}
+
+	public Transmission getTransmission() {
+		return transmission;
+	}
+
+	public void setTransmission(Transmission transmission) {
+		this.transmission = transmission;
+	}
+
+	public FuelType getFuelType() {
+		return fuelType;
+	}
+
+	public void setFuelType(FuelType fuelType) {
+		this.fuelType = fuelType;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
 }
