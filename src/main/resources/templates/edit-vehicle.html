@@ -47,7 +47,7 @@
     <div class="form-row">
         <label>Fuel Type:</label>
         <select th:field="*{fuelType}">
-            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.FuelType).values()}"
+            <option th:each="ft : ${T(com.sukru.vehiclerental.entity.enums.FuelType).values()}"
                     th:value="${ft}" th:text="${ft}"></option>
         </select>
     </div>
@@ -55,7 +55,7 @@
     <div class="form-row">
         <label>Transmission:</label>
         <select th:field="*{transmission}">
-            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.Transmission).values()}"
+            <option th:each="tr : ${T(com.sukru.vehiclerental.entity.enums.Transmission).values()}"
                     th:value="${tr}" th:text="${tr}"></option>
         </select>
     </div>
@@ -63,7 +63,7 @@
     <div class="form-row">
         <label>Status:</label>
         <select th:field="*{status}">
-            <option th:each="st : ${T(com.sukru.vehiclerental.entity.VehicleStatus).values()}"
+            <option th:each="st : ${T(com.sukru.vehiclerental.entity.enums.VehicleStatus).values()}"
                     th:value="${st}" th:text="${st}"></option>
         </select>
     </div>
