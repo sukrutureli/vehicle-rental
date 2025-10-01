@@ -138,7 +138,7 @@
 <hr/>
 
 <h2>Vehicles List</h2>
-<!-- Araç Listesi -->
+<!-- Arac Listesi -->
 <table>
     <thead>
     <tr>
@@ -155,10 +155,19 @@
     <tbody id="vehiclesTable"></tbody>
 </table>
 
+<div>
+    <button type="button" onclick="prevPage()">Prev</button>
+    <span id="pageInfo"></span>
+    <button type="button" onclick="nextPage()">Next</button>
+</div>
+
+
 <a href="/">Back to Index</a>
 
 <script>
 let currentSort = null;
+let currentPage = 0;
+let pageSize = 5;
 
 function renderVehicles(data) {
     const table = document.getElementById('vehiclesTable');
@@ -187,10 +196,14 @@ function renderVehicles(data) {
         </tr>`;
         table.innerHTML += row;
     });
+
+    document.getElementById('pageInfo').textContent = "Page: " + (currentPage + 1);
 }
 
 async function loadVehicles() {
     const params = new URLSearchParams();
+    params.append("page", currentPage);
+    params.append("size", pageSize);
 
     if (currentSort) {
         params.append("sortBy", currentSort.field);
@@ -199,6 +212,12 @@ async function loadVehicles() {
 
     const response = await fetch('/api/vehicles?' + params.toString());
     const data = await response.json();
+    
+    if (data.length === 0 && currentPage > 0) {
+        currentPage--;
+        return;
+    }
+    
     renderVehicles(data);
 }
 
@@ -230,54 +249,24 @@ async function deleteVehicle(id) {
     loadVehicles();
 }
 
-async function loadLocation(vehicleId) {
-    const response = await fetch(`/api/vehicles/${vehicleId}/location/latest`);
-    if (response.ok) {
-        const loc = await response.json();
-        alert(`Vehicle ${vehicleId}\nLat: ${loc.lat}, Lon: ${loc.lon}, Time: ${loc.reportedAt}`);
-    } else {
-        alert("No location found for this vehicle.");
-    }
+function nextPage() {
+    currentPage++;
+    loadVehicles();
 }
 
-async function filterVehicles() {
-    const params = new URLSearchParams();
-
-    if (document.getElementById('filterBrand').value)
-        params.append("brand", document.getElementById('filterBrand').value);
-    if (document.getElementById('filterModel').value)
-        params.append("model", document.getElementById('filterModel').value);
-    if (document.getElementById('filterCity').value)
-        params.append("city", document.getElementById('filterCity').value);
-    if (document.getElementById('filterFuelType').value)
-        params.append("fuelType", document.getElementById('filterFuelType').value);
-    if (document.getElementById('filterTransmission').value)
-        params.append("transmission", document.getElementById('filterTransmission').value);
-    if (document.getElementById('filterStatus').value)
-        params.append("status", document.getElementById('filterStatus').value);
-    if (document.getElementById('filterMinPrice').value)
-        params.append("minPrice", document.getElementById('filterMinPrice').value);
-    if (document.getElementById('filterMaxPrice').value)
-        params.append("maxPrice", document.getElementById('filterMaxPrice').value);
-    if (document.getElementById('filterFrom').value)
-        params.append("availableFrom", document.getElementById('filterFrom').value);
-    if (document.getElementById('filterTo').value)
-        params.append("availableTo", document.getElementById('filterTo').value);
-
-    if (currentSort) {
-        params.append("sortBy", currentSort.field);
-        params.append("sortDir", currentSort.dir);
+function prevPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        loadVehicles();
     }
-
-    const response = await fetch('/api/vehicles?' + params.toString());
-    const data = await response.json();
-    renderVehicles(data);
 }
 
 function sortVehicles(dir) {
     currentSort = { field: 'dailyPrice', dir: dir };
+    currentPage = 0;
     loadVehicles();
 }
+
 
 window.onload = loadVehicles;
 </script>

@@ -51,7 +51,9 @@ public class VehicleController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableTo,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortDir) {
+            @RequestParam(required = false) String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
         List<Vehicle> all = vehicleRepo.findAll();
         
         //Filter
@@ -77,7 +79,15 @@ public class VehicleController {
             }
         }
 
-        return filtered;
+        //Page
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, filtered.size());
+
+        if (fromIndex >= filtered.size()) {
+            return List.of();
+        }
+
+        return filtered.subList(fromIndex, toIndex);
     }
 
 
