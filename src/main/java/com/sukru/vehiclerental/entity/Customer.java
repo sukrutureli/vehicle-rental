@@ -13,7 +13,10 @@ public class Customer {
 
     private String firstName;
     private String lastName;
+    
+    @Column(nullable = false, unique = true)
     private String email;
+    
     private String phone;
     
 	public UUID getId() {

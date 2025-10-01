@@ -1,6 +1,9 @@
 package com.sukru.vehiclerental.entity;
 
 import javax.persistence.*;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,7 +22,11 @@ public class VehicleLocation {
     private Double lat;
     private Double lon;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime reportedAt;
+    
+    @Transient
+    private String vehiclePlate;
 
 	public UUID getId() {
 		return id;
@@ -59,6 +66,14 @@ public class VehicleLocation {
 
 	public void setReportedAt(LocalDateTime reportedAt) {
 		this.reportedAt = reportedAt;
+	}
+
+	public String getVehiclePlate() {
+		return vehiclePlate;
+	}
+
+	public void setVehiclePlate(String vehiclePlate) {
+		this.vehiclePlate = vehiclePlate;
 	}
     
 }

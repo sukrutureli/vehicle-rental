@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/customers")
 public class CustomerController {
 
     private final CustomerRepo customerRepo;
@@ -19,46 +18,63 @@ public class CustomerController {
         this.customerRepo = customerRepo;
     }
 
-    @GetMapping
+    @GetMapping("/customers")
     public String customersPage() {
         return "customers"; // customers.html
     }
 
-    @GetMapping("/edit")
+    @GetMapping("/customers/edit")
     public String editPage() {
         return "edit-customer"; // edit-customer.html
     }
 
     // API
 
-    @GetMapping("/api")
+    @GetMapping("/api/customers")
     @ResponseBody
     public List<Customer> listApi() {
         return customerRepo.findAll();
     }
 
-    @PostMapping("/api")
+    @PostMapping("/api/customers")
     @ResponseBody
-    public Customer addApi(@RequestBody Customer customer) {
-        return customerRepo.save(customer);
+    public ResponseEntity<?> addApi(@RequestBody Customer customer) {
+    	if (customerRepo.existsByEmail(customer.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already exists: " + customer.getEmail());
+        }
+        return ResponseEntity.ok(customerRepo.save(customer));
     }
 
-    @PutMapping("/api/{id}")
+    // Guncelle
+    @PutMapping("/api/customers/{id}")
     @ResponseBody
-    public ResponseEntity<Customer> updateApi(@PathVariable UUID id, @RequestBody Customer updated) {
-        return customerRepo.findById(id)
-                .map(c -> {
-                    updated.setId(id);
-                    return ResponseEntity.ok(customerRepo.save(updated));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateApi(@PathVariable UUID id, @RequestBody Customer updated) {
+        var existingOpt = customerRepo.findById(id);
+
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            var conflict = customerRepo.findByEmail(updated.getEmail())
+                    .filter(c -> !c.getId().equals(id));
+            if (conflict.isPresent()) {
+                return ResponseEntity.badRequest().body("Email already in use by another customer.");
+            }
+
+            updated.setId(id);
+            Customer saved = customerRepo.save(updated);
+            return ResponseEntity.ok(saved);
+        }
     }
 
-    @DeleteMapping("/api/{id}")
+    // Sil
+    @DeleteMapping("/api/customers/{id}")
     @ResponseBody
     public ResponseEntity<Void> deleteApi(@PathVariable UUID id) {
-        if (!customerRepo.existsById(id)) return ResponseEntity.notFound().build();
-        customerRepo.deleteById(id);
-        return ResponseEntity.noContent().build();
+        if (!customerRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        } else {
+            customerRepo.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
     }
 }

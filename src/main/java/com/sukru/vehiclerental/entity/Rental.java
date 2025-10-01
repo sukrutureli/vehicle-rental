@@ -37,6 +37,13 @@ public class Rental {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    @Transient
+    private String vehiclePlate;
+
+    @Transient
+    private String customerEmail;
+
 
     public UUID getId() {
         return id;
@@ -101,4 +108,20 @@ public class Rental {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+	public String getVehiclePlate() {
+		return vehiclePlate;
+	}
+
+	public void setVehiclePlate(String vehiclePlate) {
+		this.vehiclePlate = vehiclePlate;
+	}
+
+	public String getCustomerEmail() {
+		return customerEmail;
+	}
+
+	public void setCustomerEmail(String customerEmail) {
+		this.customerEmail = customerEmail;
+	}
 }

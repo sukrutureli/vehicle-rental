@@ -17,12 +17,12 @@
 <!-- Ekleme Formu -->
 <form onsubmit="addRental(); return false;">
     <div>
-        <label>Vehicle ID:</label>
-        <input type="text" id="vehicleId" required/>
+        <label>Vehicle Plate:</label>
+        <input type="text" id="vehiclePlate" required/>
     </div>
     <div>
-        <label>Customer ID:</label>
-        <input type="text" id="customerId" required/>
+        <label>Customer Email:</label>
+        <input type="text" id="customerEmail" required/>
     </div>
     <div>
         <label>Start Date:</label>
@@ -49,9 +49,8 @@
 <table>
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Vehicle</th>
-            <th>Customer</th>
+            <th>Vehicle Plate</th>
+            <th>Customer Email</th>
             <th>Start</th>
             <th>End</th>
             <th>Status</th>
@@ -68,7 +67,7 @@
 
 <script>
 async function loadRentals() {
-    const response = await fetch('/rentals/api');
+    const response = await fetch('/api/rentals');
     const data = await response.json();
 
     const table = document.getElementById('rentalsTable');
@@ -76,14 +75,13 @@ async function loadRentals() {
 
     data.forEach(r => {
         const row = `<tr>
-            <td>${r.id}</td>
-            <td>${r.vehicleId}</td>
-            <td>${r.customerId}</td>
-            <td>${r.startDate}</td>
-            <td>${r.endDate}</td>
+            <td>${r.vehiclePlate}</td>
+            <td>${r.customerEmail}</td>
+            <td>${r.startDate || ''}</td>
+            <td>${r.endDate || ''}</td>
             <td>${r.status}</td>
-            <td>${r.createdAt}</td>
-            <td>${r.updatedAt}</td>
+            <td>${r.createdAt || ''}</td>
+            <td>${r.updatedAt || ''}</td>
             <td>
 	            <button onclick="completeRental('${r.id}')">Complete</button>
 	            <button onclick="cancelRental('${r.id}')">Cancel</button>
@@ -95,14 +93,14 @@ async function loadRentals() {
 
 async function addRental() {
     const rental = {
-        vehicleId: document.getElementById('vehicleId').value,
-        customerId: document.getElementById('customerId').value,
+        vehiclePlate: document.getElementById('vehiclePlate').value,
+        customerEmail: document.getElementById('customerEmail').value,
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
         status: document.getElementById('status').value
     };
 
-    await fetch('/rentals/api', {
+    await fetch('/api/rentals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rental)
@@ -112,12 +110,12 @@ async function addRental() {
 }
 
 async function completeRental(id) {
-    await fetch(`/rentals/api/${id}/complete`, { method: 'PUT' });
+    await fetch(`/api/rentals/${id}/complete`, { method: 'PUT' });
     loadRentals();
 }
 
 async function cancelRental(id) {
-    await fetch(`/rentals/api/${id}/cancel`, { method: 'PUT' });
+    await fetch(`/api/rentals/${id}/cancel`, { method: 'PUT' });
     loadRentals();
 }
 

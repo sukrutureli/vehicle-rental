@@ -2,7 +2,11 @@ package com.sukru.vehiclerental.controller;
 
 import com.sukru.vehiclerental.entity.Rental;
 import com.sukru.vehiclerental.entity.enums.RentalStatus;
+import com.sukru.vehiclerental.entity.enums.VehicleStatus;
+import com.sukru.vehiclerental.repo.CustomerRepo;
 import com.sukru.vehiclerental.repo.RentalRepo;
+import com.sukru.vehiclerental.repo.VehicleRepo;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -12,59 +16,143 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/rentals")
 public class RentalController {
 
     private final RentalRepo rentalRepo;
+    private final VehicleRepo vehicleRepo;
+    private final CustomerRepo customerRepo;
 
-    public RentalController(RentalRepo rentalRepo) {
+    public RentalController(RentalRepo rentalRepo, VehicleRepo vehicleRepo, CustomerRepo customerRepo) {
         this.rentalRepo = rentalRepo;
+		this.vehicleRepo = vehicleRepo;
+		this.customerRepo = customerRepo;
     }
 
-    @GetMapping
+    @GetMapping("/rentals")
     public String rentalsPage() {
         return "rentals"; // rentals.html
     }
 
     // API
-    @GetMapping("/api")
+    @GetMapping("/api/rentals")
     @ResponseBody
     public List<Rental> listApi() {
-        return rentalRepo.findAll();
-    }
-
-    @PostMapping("/api")
-    @ResponseBody
-    public Rental addApi(@RequestBody Rental rental) {
-    	LocalDateTime now = LocalDateTime.now();
-        rental.setCreatedAt(now);
-        rental.setUpdatedAt(now);
-        return rentalRepo.save(rental);
+    	List<Rental> rentals = rentalRepo.findAll();
+        rentals.forEach(r -> {
+            vehicleRepo.findById(r.getVehicleId()).ifPresent(v -> r.setVehiclePlate(v.getPlate()));
+            customerRepo.findById(r.getCustomerId()).ifPresent(c -> r.setCustomerEmail(c.getEmail()));
+        });
+        return rentals;
     }
     
+    @PostMapping("/api/rentals")
+    @ResponseBody
+    public ResponseEntity<?> addApi(@RequestBody Rental rental) {
+        LocalDateTime now = LocalDateTime.now();
+        
+        var vehicleOpt = vehicleRepo.findByPlate(rental.getVehiclePlate());
+        var customerOpt = customerRepo.findByEmail(rental.getCustomerEmail());
+
+        if (vehicleOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Vehicle not found.");
+        }
+        var vehicle = vehicleOpt.get();
+        
+        if (customerOpt.isEmpty()) {
+        	return ResponseEntity.badRequest().body("Customer not found.");
+        }
+        var customer = customerOpt.get();
+        
+        rental.setVehicleId(vehicle.getId());
+        rental.setCustomerId(customer.getId());
+
+        if (rental.getStartDate().isBefore(vehicle.getAvailableFrom()) ||
+            rental.getEndDate().isAfter(vehicle.getAvailableTo())) {
+            return ResponseEntity.badRequest().body("Vehicle is not available in this date range.");
+        }
+
+        // Cakisma kontrolu
+        List<Rental> rentals = rentalRepo.findByVehicleId(rental.getVehicleId());
+        for (Rental existing : rentals) {
+            if ("ACTIVE".equalsIgnoreCase(existing.getStatus().toString())) {
+                boolean overlap = 
+                    (rental.getStartDate().isBefore(existing.getEndDate()) &&
+                     rental.getEndDate().isAfter(existing.getStartDate()));
+
+                if (overlap) {
+                    return ResponseEntity.badRequest().body("Vehicle already rented in this date range.");
+                }
+            }
+        }
+
+        // Kaydet
+        rental.setCreatedAt(now);
+        rental.setUpdatedAt(now);
+        
+        vehicle.setStatus(VehicleStatus.RENTED);
+        vehicle.setUpdatedAt(now);
+        vehicleRepo.save(vehicle);
+        
+        return ResponseEntity.ok(rentalRepo.save(rental));
+    }
+
+    
     // API - Complete
-    @PutMapping("/api/{id}/complete")
+    @PutMapping("/api/rentals/{id}/complete")
     @ResponseBody
     public ResponseEntity<Rental> completeRental(@PathVariable UUID id) {
-        return rentalRepo.findById(id)
-                .map(r -> {
-                    r.setStatus(RentalStatus.COMPLETED);
-                    r.setUpdatedAt(LocalDateTime.now());
-                    return ResponseEntity.ok(rentalRepo.save(r));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    	LocalDateTime now = LocalDateTime.now();
+    	
+        var rentalOpt = rentalRepo.findById(id);
+
+        if (rentalOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Rental rental = rentalOpt.get();
+        rental.setStatus(RentalStatus.COMPLETED);
+        rental.setUpdatedAt(now);
+        rentalRepo.save(rental);
+
+        // Vehicle durumunu guncelle → AVAILABLE
+        var vehicleOpt = vehicleRepo.findById(rental.getVehicleId());
+        if (vehicleOpt.isPresent()) {
+            var vehicle = vehicleOpt.get();
+            vehicle.setStatus(VehicleStatus.AVAILABLE);
+            vehicle.setUpdatedAt(now);
+            vehicleRepo.save(vehicle);
+        }
+
+        return ResponseEntity.ok(rental);
     }
 
     // API - Cancel
-    @PutMapping("/api/{id}/cancel")
+    @PutMapping("/api/rentals/{id}/cancel")
     @ResponseBody
     public ResponseEntity<Rental> cancelRental(@PathVariable UUID id) {
-        return rentalRepo.findById(id)
-                .map(r -> {
-                    r.setStatus(RentalStatus.CANCELLED);
-                    r.setUpdatedAt(LocalDateTime.now());
-                    return ResponseEntity.ok(rentalRepo.save(r));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    	LocalDateTime now = LocalDateTime.now();
+    	
+        var rentalOpt = rentalRepo.findById(id);
+
+        if (rentalOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Rental rental = rentalOpt.get();
+        rental.setStatus(RentalStatus.CANCELLED);
+        rental.setUpdatedAt(now);
+        rentalRepo.save(rental);
+
+        // Vehicle durumunu guncelle → AVAILABLE
+        var vehicleOpt = vehicleRepo.findById(rental.getVehicleId());
+        if (vehicleOpt.isPresent()) {
+            var vehicle = vehicleOpt.get();
+            vehicle.setStatus(VehicleStatus.AVAILABLE);
+            vehicle.setUpdatedAt(now);
+            vehicleRepo.save(vehicle);
+        }
+
+        return ResponseEntity.ok(rental);
     }
+
 }

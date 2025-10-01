@@ -46,7 +46,7 @@ async function loadCustomer() {
         return;
     }
 
-    const response = await fetch('/customers/api');
+    const response = await fetch('/api/customers');
     const data = await response.json();
     const c = data.find(cust => cust.id === id);
 
@@ -70,7 +70,7 @@ async function updateCustomer(event) {
         phone: document.getElementById('phone').value
     };
 
-    await fetch(`/customers/api/${id}`, {
+    await fetch(`/api/customers/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated)

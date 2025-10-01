@@ -62,6 +62,14 @@
 	        <option value="MAINTENANCE">MAINTENANCE</option>
 	    </select>
     </div>
+    <div class="form-row">
+        <label>Available From:</label>
+        <input type="datetime-local" id="availableFrom" required/>
+    </div>
+    <div class="form-row">
+        <label>Available To:</label>
+        <input type="datetime-local" id="availableTo" required/>
+    </div>
     <button type="submit">Add Vehicle</button>
 </form>
 
@@ -71,9 +79,9 @@
 <table>
     <thead>
     <tr>
-        <th>ID</th><th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
+        <th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
         <th>Price</th><th>Fuel</th><th>Transmission</th><th>Status</th>
-        <th>Created</th><th>Updated</th><th>Actions</th>
+        <th>Available From</th><th>Available To</th><th>Created</th><th>Updated</th><th>Actions</th>
     </tr>
     </thead>
     <tbody id="vehiclesTable"></tbody>
@@ -83,7 +91,7 @@
 
 <script>
 async function loadVehicles() {
-    const response = await fetch('/vehicles/api');
+    const response = await fetch('/api/vehicles');
     const data = await response.json();
 
     const table = document.getElementById('vehiclesTable');
@@ -91,7 +99,6 @@ async function loadVehicles() {
 
     data.forEach(v => {
         const row = `<tr>
-            <td>${v.id}</td>
             <td>${v.brand}</td>
             <td>${v.model}</td>
             <td>${v.city}</td>
@@ -100,6 +107,8 @@ async function loadVehicles() {
             <td>${v.fuelType}</td>
             <td>${v.transmission}</td>
             <td>${v.status}</td>
+            <td>${v.availableFrom || ''}</td>
+            <td>${v.availableTo || ''}</td>
             <td>${v.createdAt || ''}</td>
             <td>${v.updatedAt || ''}</td>
             <td>
@@ -121,10 +130,12 @@ async function addVehicle() {
         dailyPrice: document.getElementById('dailyPrice').value,
         fuelType: document.getElementById('fuelType').value,
         transmission: document.getElementById('transmission').value,
-        status: document.getElementById('status').value
+        status: document.getElementById('status').value,
+        availableFrom: document.getElementById('availableFrom').value,
+        availableTo: document.getElementById('availableTo').value
     };
 
-    await fetch('/vehicles/api', {
+    await fetch('/api/vehicles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(vehicle)
@@ -134,7 +145,7 @@ async function addVehicle() {
 }
 
 async function deleteVehicle(id) {
-    await fetch(`/vehicles/api/${id}`, { method: 'DELETE' });
+    await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
     loadVehicles();
 }
 

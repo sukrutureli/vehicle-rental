@@ -26,12 +26,6 @@
         th {
             background-color: #f2f2f2;
         }
-        a {
-            display: inline-block;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #007BFF;
-        }
     </style>
 </head>
 <body>
@@ -40,7 +34,7 @@
 <table>
     <thead>
         <tr>
-            <th>Vehicle</th>
+            <th>Vehicle Plate</th>
             <th>Latitude</th>
             <th>Longitude</th>
             <th>Reported At</th>
@@ -61,10 +55,10 @@
 
         data.forEach(loc => {
             const row = `<tr>
-                <td>${loc.vehicleId}</td>
+                <td>${loc.vehiclePlate}</td>
                 <td>${loc.lat}</td>
                 <td>${loc.lon}</td>
-                <td>${loc.reportedAt}</td>
+                <td>${loc.reportedAt || ''}</td>
             </tr>`;
             table.innerHTML += row;
         });

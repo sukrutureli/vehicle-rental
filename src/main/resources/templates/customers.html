@@ -52,7 +52,7 @@
 <table>
     <thead>
         <tr>
-            <th>ID</th><th>First</th><th>Last</th>
+            <th>First</th><th>Last</th>
             <th>Email</th><th>Phone</th><th>Actions</th>
         </tr>
     </thead>
@@ -64,7 +64,7 @@
 
 <script>
 async function loadCustomers() {
-    const response = await fetch('/customers/api');
+    const response = await fetch('/api/customers');
     const data = await response.json();
 
     const table = document.getElementById('customersTable');
@@ -72,7 +72,6 @@ async function loadCustomers() {
 
     data.forEach(c => {
         const row = `<tr>
-            <td>${c.id}</td>
             <td>${c.firstName}</td>
             <td>${c.lastName}</td>
             <td>${c.email}</td>
@@ -94,7 +93,7 @@ async function addCustomer() {
         phone: document.getElementById('phone').value
     };
 
-    await fetch('/customers/api', {
+    await fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(customer)
@@ -104,7 +103,7 @@ async function addCustomer() {
 }
 
 async function deleteCustomer(id) {
-    await fetch(`/customers/api/${id}`, { method: 'DELETE' });
+    await fetch(`/api/customers/${id}`, { method: 'DELETE' });
     loadCustomers();
 }
 

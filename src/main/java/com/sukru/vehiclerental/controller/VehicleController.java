@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/vehicles")
 public class VehicleController {
 
     private final VehicleRepo vehicleRepo;
@@ -21,12 +20,12 @@ public class VehicleController {
         this.vehicleRepo = vehicleRepo;
     }
 
-    @GetMapping
+    @GetMapping("/vehicles")
     public String vehiclesPage() {
         return "vehicles"; // vehicles.html
     } 
     
-    @GetMapping("/edit")
+    @GetMapping("/vehicles/edit")
     public String editPage() {
         return "edit-vehicle"; // edit-vehicle.html
     }
@@ -34,45 +33,60 @@ public class VehicleController {
     // API
 
     // Listele
-    @GetMapping("/api")
+    @GetMapping("/api/vehicles")
     @ResponseBody
     public List<Vehicle> listVehiclesApi() {
         return vehicleRepo.findAll();
     }
 
     // Ekle
-    @PostMapping("/api")
+    @PostMapping("/api/vehicles")
     @ResponseBody
-    public Vehicle addVehicleApi(@RequestBody Vehicle vehicle) {
+    public ResponseEntity<?> addVehicleApi(@RequestBody Vehicle vehicle) {
+    	if (vehicleRepo.existsByPlate(vehicle.getPlate())) {
+            return ResponseEntity.badRequest().body("Plate already exists: " + vehicle.getPlate());
+        }
         LocalDateTime now = LocalDateTime.now();
         vehicle.setCreatedAt(now);
         vehicle.setUpdatedAt(now);
-        return vehicleRepo.save(vehicle);
+        return ResponseEntity.ok(vehicleRepo.save(vehicle));
     }
 
     // Guncelle
-    @PutMapping("/api/{id}")
+    @PutMapping("/api/vehicles/{id}")
     @ResponseBody
-    public ResponseEntity<Vehicle> updateVehicleApi(@PathVariable("id") UUID id,
-                                                    @RequestBody Vehicle updated) {
-        return vehicleRepo.findById(id)
-                .map(existing -> {
-                    updated.setId(id); // ID sabit kalir
-                    updated.setCreatedAt(existing.getCreatedAt()); // createdAt korunur
-                    updated.setUpdatedAt(LocalDateTime.now());
-                    return ResponseEntity.ok(vehicleRepo.save(updated));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateVehicleApi(@PathVariable("id") UUID id,
+                                              @RequestBody Vehicle updated) {
+        var existingOpt = vehicleRepo.findById(id);
+
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            var conflict = vehicleRepo.findByPlate(updated.getPlate())
+                    .filter(v -> !v.getId().equals(id));
+            if (conflict.isPresent()) {
+                return ResponseEntity.badRequest().body("Plate already in use by another vehicle.");
+            }
+
+            Vehicle existing = existingOpt.get();
+            updated.setId(id);
+            updated.setCreatedAt(existing.getCreatedAt()); // createdAt sabit
+            updated.setUpdatedAt(LocalDateTime.now());
+
+            Vehicle saved = vehicleRepo.save(updated);
+            return ResponseEntity.ok(saved);
+        }
     }
 
     // Sil
-    @DeleteMapping("/api/{id}")
+    @DeleteMapping("/api/vehicles/{id}")
     @ResponseBody
     public ResponseEntity<Void> deleteVehicleApi(@PathVariable UUID id) {
         if (!vehicleRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
+        } else {
+            vehicleRepo.deleteById(id);
+            return ResponseEntity.noContent().build();
         }
-        vehicleRepo.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

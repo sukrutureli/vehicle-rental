@@ -29,7 +29,7 @@ public class DummyLocationGenerator {
     public void updateLocations() {
         List<Vehicle> activeVehicles = vehicleRepo.findAll()
                 .stream()
-                .filter(v -> "AVAILABLE".equalsIgnoreCase(v.getStatus().toString()))
+                .filter(v -> !"MAINTENANCE".equalsIgnoreCase(v.getStatus().toString()))
                 .collect(Collectors.toList());
 
         for (Vehicle vehicle : activeVehicles) {

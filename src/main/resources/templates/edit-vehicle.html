@@ -58,6 +58,14 @@
 	        <option value="MAINTENANCE">MAINTENANCE</option>
 	    </select>
     </div>
+    <div class="form-row">
+        <label>Available From:</label>
+        <input type="datetime-local" id="availableFrom" required/>
+    </div>
+    <div class="form-row">
+        <label>Available To:</label>
+        <input type="datetime-local" id="availableTo" required/>
+    </div>
 
     <button type="submit">Update Vehicle</button>
 </form>
@@ -71,7 +79,7 @@ async function loadVehicle() {
     const id = params.get("id");
     if (!id) return;
 
-    const response = await fetch(`/vehicles/api`);
+    const response = await fetch(`/api/vehicles`);
     const data = await response.json();
     const v = data.find(x => x.id === id);
 
@@ -85,6 +93,8 @@ async function loadVehicle() {
         document.getElementById('fuelType').value = v.fuelType;
         document.getElementById('transmission').value = v.transmission;
         document.getElementById('status').value = v.status;
+        document.getElementById('availableFrom').value = v.availableFrom;
+        document.getElementById('availableTo').value = v.availableTo;
     }
 }
 
@@ -99,10 +109,12 @@ async function updateVehicle() {
         dailyPrice: document.getElementById('dailyPrice').value,
         fuelType: document.getElementById('fuelType').value,
         transmission: document.getElementById('transmission').value,
-        status: document.getElementById('status').value
+        status: document.getElementById('status').value,
+        availableFrom: document.getElementById('availableFrom').value,
+        availableTo: document.getElementById('availableTo').value
     };
 
-    await fetch(`/vehicles/api/${id}`, {
+    await fetch(`/api/vehicles/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated)

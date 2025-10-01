@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.sukru.vehiclerental.entity.enums.FuelType;
 import com.sukru.vehiclerental.entity.enums.Transmission;
 import com.sukru.vehiclerental.entity.enums.VehicleStatus;
@@ -23,8 +25,10 @@ public class Vehicle {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "BINARY(16)")
 	private UUID id;
-
+	
+	@Column(nullable = false, unique = true)
     private String plate;
+	
     private String brand;
     private String model;
     private String city;
@@ -39,6 +43,12 @@ public class Vehicle {
     @Enumerated(EnumType.STRING)
     private FuelType fuelType;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime availableFrom;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime availableTo;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -130,6 +140,22 @@ public class Vehicle {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public LocalDateTime getAvailableFrom() {
+		return availableFrom;
+	}
+
+	public void setAvailableFrom(LocalDateTime availableFrom) {
+		this.availableFrom = availableFrom;
+	}
+
+	public LocalDateTime getAvailableTo() {
+		return availableTo;
+	}
+
+	public void setAvailableTo(LocalDateTime availableTo) {
+		this.availableTo = availableTo;
 	}
 
 }
