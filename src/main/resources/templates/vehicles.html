@@ -135,7 +135,6 @@
     <button type="submit">Filter</button>
 </form>
 
-
 <hr/>
 
 <h2>Vehicles List</h2>
@@ -144,7 +143,12 @@
     <thead>
     <tr>
         <th>Brand</th><th>Model</th><th>City</th><th>Plate</th>
-        <th>Price</th><th>Fuel</th><th>Transmission</th><th>Status</th>
+        <th>
+            Price <br/>
+            <button type="button" onclick="sortVehicles('asc')">asc</button> 
+            <button type="button" onclick="sortVehicles('desc')">desc</button>
+        </th>
+        <th>Fuel</th><th>Transmission</th><th>Status</th>
         <th>Available From</th><th>Available To</th><th>Created</th><th>Updated</th><th>Actions</th>
     </tr>
     </thead>
@@ -154,10 +158,9 @@
 <a href="/">Back to Index</a>
 
 <script>
-async function loadVehicles() {
-    const response = await fetch('/api/vehicles');
-    const data = await response.json();
+let currentSort = null;
 
+function renderVehicles(data) {
     const table = document.getElementById('vehiclesTable');
     table.innerHTML = '';
 
@@ -184,6 +187,19 @@ async function loadVehicles() {
         </tr>`;
         table.innerHTML += row;
     });
+}
+
+async function loadVehicles() {
+    const params = new URLSearchParams();
+
+    if (currentSort) {
+        params.append("sortBy", currentSort.field);
+        params.append("sortDir", currentSort.dir);
+    }
+
+    const response = await fetch('/api/vehicles?' + params.toString());
+    const data = await response.json();
+    renderVehicles(data);
 }
 
 async function addVehicle() {
@@ -229,65 +245,39 @@ async function filterVehicles() {
 
     if (document.getElementById('filterBrand').value)
         params.append("brand", document.getElementById('filterBrand').value);
-
     if (document.getElementById('filterModel').value)
         params.append("model", document.getElementById('filterModel').value);
-
     if (document.getElementById('filterCity').value)
         params.append("city", document.getElementById('filterCity').value);
-
     if (document.getElementById('filterFuelType').value)
         params.append("fuelType", document.getElementById('filterFuelType').value);
-
     if (document.getElementById('filterTransmission').value)
         params.append("transmission", document.getElementById('filterTransmission').value);
-
     if (document.getElementById('filterStatus').value)
         params.append("status", document.getElementById('filterStatus').value);
-
     if (document.getElementById('filterMinPrice').value)
         params.append("minPrice", document.getElementById('filterMinPrice').value);
-
     if (document.getElementById('filterMaxPrice').value)
         params.append("maxPrice", document.getElementById('filterMaxPrice').value);
-
     if (document.getElementById('filterFrom').value)
         params.append("availableFrom", document.getElementById('filterFrom').value);
-
     if (document.getElementById('filterTo').value)
         params.append("availableTo", document.getElementById('filterTo').value);
 
+    if (currentSort) {
+        params.append("sortBy", currentSort.field);
+        params.append("sortDir", currentSort.dir);
+    }
+
     const response = await fetch('/api/vehicles?' + params.toString());
     const data = await response.json();
-
-    const table = document.getElementById('vehiclesTable');
-    table.innerHTML = '';
-
-    data.forEach(v => {
-        const row = `<tr>
-            <td>${v.brand}</td>
-            <td>${v.model}</td>
-            <td>${v.city}</td>
-            <td>${v.plate}</td>
-            <td>${v.dailyPrice}</td>
-            <td>${v.fuelType}</td>
-            <td>${v.transmission}</td>
-            <td>${v.status}</td>
-            <td>${v.availableFrom || ''}</td>
-            <td>${v.availableTo || ''}</td>
-            <td>${v.createdAt || ''}</td>
-            <td>${v.updatedAt || ''}</td>
-            <td>
-	            <a href="/vehicles/edit?id=${v.id}">Edit</a>  
-                <a href="/api/vehicles/${v.id}">View</a>
-	            <button onclick="deleteVehicle('${v.id}')">Delete</button> 
-                <a href="/api/vehicles/${v.id}/location/latest">Location</a> 
-	        </td>
-        </tr>`;
-        table.innerHTML += row;
-    });
+    renderVehicles(data);
 }
 
+function sortVehicles(dir) {
+    currentSort = { field: 'dailyPrice', dir: dir };
+    loadVehicles();
+}
 
 window.onload = loadVehicles;
 </script>

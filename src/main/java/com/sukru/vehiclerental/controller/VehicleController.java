@@ -49,11 +49,13 @@ public class VehicleController {
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableTo
-    ) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableTo,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDir) {
         List<Vehicle> all = vehicleRepo.findAll();
-
-        return all.stream()
+        
+        //Filter
+        List<Vehicle> filtered = all.stream()
                 .filter(v -> brand == null || v.getBrand().equalsIgnoreCase(brand))
                 .filter(v -> model == null || v.getModel().equalsIgnoreCase(model))
                 .filter(v -> city == null || v.getCity().equalsIgnoreCase(city))
@@ -65,6 +67,17 @@ public class VehicleController {
                 .filter(v -> availableFrom == null || !v.getAvailableFrom().isAfter(availableFrom))
                 .filter(v -> availableTo == null || !v.getAvailableTo().isBefore(availableTo))
                 .collect(Collectors.toList());
+        
+        //Sort
+        if ("dailyPrice".equalsIgnoreCase(sortBy)) {
+            if ("desc".equalsIgnoreCase(sortDir)) {
+                filtered.sort((a, b) -> b.getDailyPrice().compareTo(a.getDailyPrice()));
+            } else {
+                filtered.sort((a, b) -> a.getDailyPrice().compareTo(b.getDailyPrice()));
+            }
+        }
+
+        return filtered;
     }
 
 
