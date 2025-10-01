@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-<h1>Vehicle List</h1>
+<h1>Add Vehicle</h1>
 
 <!-- Ekleme Formu -->
 <form onsubmit="addVehicle(); return false;">
@@ -75,6 +75,70 @@
 
 <hr/>
 
+<h1>Filter Vehicles</h1>
+<form onsubmit="filterVehicles(); return false;">
+    <div>
+        <label>Brand:</label>
+        <input type="text" id="filterBrand"/>
+    </div>
+    <div>
+        <label>Model:</label>
+        <input type="text" id="filterModel"/>
+    </div>
+    <div>
+        <label>City:</label>
+        <input type="text" id="filterCity"/>
+    </div>
+    <div>
+        <label>Fuel Type:</label>
+        <select id="filterFuelType">
+            <option value="">--Any--</option>
+            <option value="GASOLINE">GASOLINE</option>
+            <option value="DIESEL">DIESEL</option>
+            <option value="ELECTRIC">ELECTRIC</option>
+            <option value="HYBRID">HYBRID</option>
+        </select>
+    </div>
+    <div>
+        <label>Transmission:</label>
+        <select id="filterTransmission">
+            <option value="">--Any--</option>
+            <option value="MANUAL">MANUAL</option>
+            <option value="AUTOMATIC">AUTOMATIC</option>
+        </select>
+    </div>
+    <div>
+        <label>Status:</label>
+        <select id="filterStatus">
+            <option value="">--Any--</option>
+            <option value="AVAILABLE">AVAILABLE</option>
+            <option value="RENTED">RENTED</option>
+            <option value="MAINTENANCE">MAINTENANCE</option>
+        </select>
+    </div>
+    <div>
+        <label>Min Price:</label>
+        <input type="number" id="filterMinPrice"/>
+    </div>
+    <div>
+        <label>Max Price:</label>
+        <input type="number" id="filterMaxPrice"/>
+    </div>
+    <div>
+        <label>Available From:</label>
+        <input type="datetime-local" id="filterFrom"/>
+    </div>
+    <div>
+        <label>Available To:</label>
+        <input type="datetime-local" id="filterTo"/>
+    </div>
+    <button type="submit">Filter</button>
+</form>
+
+
+<hr/>
+
+<h1>Vehicles List</h1>
 <!-- Araç Listesi -->
 <table>
     <thead>
@@ -158,6 +222,70 @@ async function loadLocation(vehicleId) {
         alert("No location found for this vehicle.");
     }
 }
+
+async function filterVehicles() {
+    const params = new URLSearchParams();
+
+    if (document.getElementById('filterBrand').value)
+        params.append("brand", document.getElementById('filterBrand').value);
+
+    if (document.getElementById('filterModel').value)
+        params.append("model", document.getElementById('filterModel').value);
+
+    if (document.getElementById('filterCity').value)
+        params.append("city", document.getElementById('filterCity').value);
+
+    if (document.getElementById('filterFuelType').value)
+        params.append("fuelType", document.getElementById('filterFuelType').value);
+
+    if (document.getElementById('filterTransmission').value)
+        params.append("transmission", document.getElementById('filterTransmission').value);
+
+    if (document.getElementById('filterStatus').value)
+        params.append("status", document.getElementById('filterStatus').value);
+
+    if (document.getElementById('filterMinPrice').value)
+        params.append("minPrice", document.getElementById('filterMinPrice').value);
+
+    if (document.getElementById('filterMaxPrice').value)
+        params.append("maxPrice", document.getElementById('filterMaxPrice').value);
+
+    if (document.getElementById('filterFrom').value)
+        params.append("availableFrom", document.getElementById('filterFrom').value);
+
+    if (document.getElementById('filterTo').value)
+        params.append("availableTo", document.getElementById('filterTo').value);
+
+    const response = await fetch('/api/vehicles?' + params.toString());
+    const data = await response.json();
+
+    const table = document.getElementById('vehiclesTable');
+    table.innerHTML = '';
+
+    data.forEach(v => {
+        const row = `<tr>
+            <td>${v.brand}</td>
+            <td>${v.model}</td>
+            <td>${v.city}</td>
+            <td>${v.plate}</td>
+            <td>${v.dailyPrice}</td>
+            <td>${v.fuelType}</td>
+            <td>${v.transmission}</td>
+            <td>${v.status}</td>
+            <td>${v.availableFrom || ''}</td>
+            <td>${v.availableTo || ''}</td>
+            <td>${v.createdAt || ''}</td>
+            <td>${v.updatedAt || ''}</td>
+            <td>
+	            <a href="/vehicles/edit?id=${v.id}">Edit</a> 
+	            <button onclick="deleteVehicle('${v.id}')">Delete</button>
+	            <button onclick="loadLocation('${v.id}')">Location</button>
+	        </td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+}
+
 
 window.onload = loadVehicles;
 </script>

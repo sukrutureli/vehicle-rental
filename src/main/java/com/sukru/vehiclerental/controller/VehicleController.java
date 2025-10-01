@@ -2,14 +2,18 @@ package com.sukru.vehiclerental.controller;
 
 import com.sukru.vehiclerental.entity.Vehicle;
 import com.sukru.vehiclerental.repo.VehicleRepo;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class VehicleController {
@@ -35,9 +39,34 @@ public class VehicleController {
     // Listele
     @GetMapping("/api/vehicles")
     @ResponseBody
-    public List<Vehicle> listVehiclesApi() {
-        return vehicleRepo.findAll();
+    public List<Vehicle> listVehiclesApi(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String model,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String fuelType,
+            @RequestParam(required = false) String transmission,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime availableTo
+    ) {
+        List<Vehicle> all = vehicleRepo.findAll();
+
+        return all.stream()
+                .filter(v -> brand == null || v.getBrand().equalsIgnoreCase(brand))
+                .filter(v -> model == null || v.getModel().equalsIgnoreCase(model))
+                .filter(v -> city == null || v.getCity().equalsIgnoreCase(city))
+                .filter(v -> fuelType == null || v.getFuelType().toString().equalsIgnoreCase(fuelType))
+                .filter(v -> transmission == null || v.getTransmission().toString().equalsIgnoreCase(transmission))
+                .filter(v -> status == null || v.getStatus().toString().equalsIgnoreCase(status))
+                .filter(v -> minPrice == null || v.getDailyPrice() >= minPrice)
+                .filter(v -> maxPrice == null || v.getDailyPrice() <= maxPrice)
+                .filter(v -> availableFrom == null || !v.getAvailableFrom().isAfter(availableFrom))
+                .filter(v -> availableTo == null || !v.getAvailableTo().isBefore(availableTo))
+                .collect(Collectors.toList());
     }
+
 
     // Ekle
     @PostMapping("/api/vehicles")
