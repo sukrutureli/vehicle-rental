@@ -78,6 +78,7 @@ async function loadCustomers() {
             <td>${c.phone}</td>
             <td>
                 <a href="/customers/edit?id=${c.id}">Edit</a> |
+                <a href="/api/customers/${c.id}">View</a> |
                 <button onclick="deleteCustomer('${c.id}')">Delete</button>
             </td>
         </tr>`;

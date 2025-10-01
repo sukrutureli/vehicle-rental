@@ -81,6 +81,17 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleRepo.save(vehicle));
     }
 
+    // Detay
+    @GetMapping("/api/vehicles/{id}")
+    @ResponseBody
+    public ResponseEntity<Vehicle> getVehicleById(@PathVariable UUID id) {
+        var opt = vehicleRepo.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(opt.get());
+    }
+    
     // Guncelle
     @PutMapping("/api/vehicles/{id}")
     @ResponseBody

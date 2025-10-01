@@ -177,8 +177,9 @@ async function loadVehicles() {
             <td>${v.updatedAt || ''}</td>
             <td>
                 <a href="/vehicles/edit?id=${v.id}">Edit</a> 
+                <a href="/api/vehicles/${v.id}">View</a> 
                 <button onclick="deleteVehicle('${v.id}')">Delete</button>
-                <button onclick="loadLocation('${v.id}')">Location</button>
+                <a href="/api/vehicles/${v.id}/location/latest">Location</a> 
             </td>
         </tr>`;
         table.innerHTML += row;
@@ -277,9 +278,10 @@ async function filterVehicles() {
             <td>${v.createdAt || ''}</td>
             <td>${v.updatedAt || ''}</td>
             <td>
-	            <a href="/vehicles/edit?id=${v.id}">Edit</a> 
-	            <button onclick="deleteVehicle('${v.id}')">Delete</button>
-	            <button onclick="loadLocation('${v.id}')">Location</button>
+	            <a href="/vehicles/edit?id=${v.id}">Edit</a>  
+                <a href="/api/vehicles/${v.id}">View</a>
+	            <button onclick="deleteVehicle('${v.id}')">Delete</button> 
+                <a href="/api/vehicles/${v.id}/location/latest">Location</a> 
 	        </td>
         </tr>`;
         table.innerHTML += row;

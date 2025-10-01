@@ -35,6 +35,16 @@ public class CustomerController {
     public List<Customer> listApi() {
         return customerRepo.findAll();
     }
+    
+    @GetMapping("/api/customers/{id}")
+    @ResponseBody
+    public ResponseEntity<Customer> getCustomerById(@PathVariable UUID id) {
+        var opt = customerRepo.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(opt.get());
+    }
 
     @PostMapping("/api/customers")
     @ResponseBody
