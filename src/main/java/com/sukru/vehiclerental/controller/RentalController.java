@@ -7,6 +7,7 @@ import com.sukru.vehiclerental.repo.CustomerRepo;
 import com.sukru.vehiclerental.repo.RentalRepo;
 import com.sukru.vehiclerental.repo.VehicleRepo;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 public class RentalController {
@@ -36,14 +38,31 @@ public class RentalController {
     // API
     @GetMapping("/api/rentals")
     @ResponseBody
-    public List<Rental> listApi() {
-    	List<Rental> rentals = rentalRepo.findAll();
+    public List<Rental> listApi(
+            @RequestParam(required = false) String vehiclePlate,
+            @RequestParam(required = false) String customerEmail,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+    	
+        List<Rental> rentals = rentalRepo.findAll();
+
         rentals.forEach(r -> {
             vehicleRepo.findById(r.getVehicleId()).ifPresent(v -> r.setVehiclePlate(v.getPlate()));
             customerRepo.findById(r.getCustomerId()).ifPresent(c -> r.setCustomerEmail(c.getEmail()));
         });
-        return rentals;
+
+        return rentals.stream()
+                .filter(r -> vehiclePlate == null || r.getVehiclePlate().equalsIgnoreCase(vehiclePlate))
+                .filter(r -> customerEmail == null || r.getCustomerEmail().equalsIgnoreCase(customerEmail))
+                .filter(r -> status == null || r.getStatus().name().equalsIgnoreCase(status))
+                .filter(r -> startDate == null || !r.getStartDate().isBefore(startDate))
+                .filter(r -> endDate == null || !r.getEndDate().isAfter(endDate))
+                .collect(Collectors.toList());
     }
+
     
     @PostMapping("/api/rentals")
     @ResponseBody

@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-<h1>Rental List</h1>
+<h2>Add Rental</h2>
 
 <!-- Ekleme Formu -->
 <form onsubmit="addRental(); return false;">
@@ -45,6 +45,40 @@
 
 <hr/>
 
+<h2>Filter Rentals</h2>
+
+<form onsubmit="filterRentals(); return false;">
+    <div>
+        <label>Vehicle Plate:</label>
+        <input type="text" id="filterPlate"/>
+    </div>
+    <div>
+        <label>Customer Email:</label>
+        <input type="text" id="filterEmail"/>
+    </div>
+    <div>
+        <label>Status:</label>
+        <select id="filterStatus">
+            <option value="">--Any--</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="CANCELLED">CANCELLED</option>
+        </select>
+    </div>
+    <div>
+        <label>Start From:</label>
+        <input type="datetime-local" id="filterStartedFrom"/>
+    </div>
+    <div>
+        <label>End To:</label>
+        <input type="datetime-local" id="filterEndedTo"/>
+    </div>
+    <button type="submit">Filter</button>
+</form>
+
+<hr/>
+
+<h2>Rentals List</h2>
 <!-- Liste -->
 <table>
     <thead>
@@ -107,6 +141,49 @@ async function addRental() {
     });
 
     loadRentals();
+}
+
+async function filterRentals() {
+    const params = new URLSearchParams();
+
+    if (document.getElementById('filterPlate').value)
+        params.append("vehiclePlate", document.getElementById('filterPlate').value);
+
+    if (document.getElementById('filterEmail').value)
+        params.append("customerEmail", document.getElementById('filterEmail').value);
+
+    if (document.getElementById('filterStatus').value)
+        params.append("status", document.getElementById('filterStatus').value);
+
+    if (document.getElementById('filterStartedFrom').value)
+        params.append("startDate", document.getElementById('filterStartedFrom').value);
+
+    if (document.getElementById('filterEndedTo').value)
+        params.append("endDate", document.getElementById('filterEndedTo').value);
+
+    const response = await fetch(`/api/rentals?${params.toString()}`);
+    const data = await response.json();
+
+    const table = document.getElementById('rentalsTable');
+    table.innerHTML = '';
+
+    data.forEach(r => {
+        const row = `<tr>
+            <td>${r.vehiclePlate}</td>
+            <td>${r.customerEmail}</td>
+            <td>${r.startDate || ''}</td>
+            <td>${r.endDate || ''}</td>
+            <td>${r.status}</td>
+            <td>${r.createdAt || ''}</td>
+            <td>${r.updatedAt || ''}</td>
+            <td>
+	            <button onclick="completeRental('${r.id}')">Complete</button>
+	            <button onclick="cancelRental('${r.id}')">Cancel</button>
+	        </td>
+        </tr>`;
+        table.innerHTML += row;
+    });
+    
 }
 
 async function completeRental(id) {
