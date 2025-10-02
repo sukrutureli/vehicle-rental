@@ -168,6 +168,7 @@
 let currentSort = null;
 let currentPage = 0;
 let pageSize = 5;
+let currentFilters = {};
 
 function renderVehicles(data) {
     const table = document.getElementById('vehiclesTable');
@@ -183,10 +184,10 @@ function renderVehicles(data) {
             <td>${v.fuelType}</td>
             <td>${v.transmission}</td>
             <td>${v.status}</td>
-            <td>${v.availableFrom || ''}</td>
-            <td>${v.availableTo || ''}</td>
-            <td>${v.createdAt || ''}</td>
-            <td>${v.updatedAt || ''}</td>
+            <td>${v.availableFrom}</td>
+            <td>${v.availableTo}</td>
+            <td>${v.createdAt}</td>
+            <td>${v.updatedAt}</td>
             <td>
                 <a href="/vehicles/edit?id=${v.id}">Edit</a> 
                 <a href="/api/vehicles/${v.id}">View</a> 
@@ -204,6 +205,12 @@ async function loadVehicles() {
     const params = new URLSearchParams();
     params.append("page", currentPage);
     params.append("size", pageSize);
+    
+    for (const [key, value] of Object.entries(currentFilters)) {
+        if (value) {
+            params.append(key, value);
+        }
+    }
 
     if (currentSort) {
         params.append("sortBy", currentSort.field);
@@ -246,6 +253,24 @@ async function addVehicle() {
 
 async function deleteVehicle(id) {
     await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
+    loadVehicles();
+}
+
+function filterVehicles() {
+    currentFilters = {
+        brand: document.getElementById('filterBrand').value,
+        model: document.getElementById('filterModel').value,
+        city: document.getElementById('filterCity').value,
+        fuelType: document.getElementById('filterFuelType').value,
+        transmission: document.getElementById('filterTransmission').value,
+        status: document.getElementById('filterStatus').value,
+        minPrice: document.getElementById('filterMinPrice').value,
+        maxPrice: document.getElementById('filterMaxPrice').value,
+        availableFrom: document.getElementById('filterFrom').value,
+        availableTo: document.getElementById('filterTo').value
+    };
+
+    currentPage = 0;
     loadVehicles();
 }
 

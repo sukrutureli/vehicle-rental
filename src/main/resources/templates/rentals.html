@@ -111,11 +111,11 @@ async function loadRentals() {
         const row = `<tr>
             <td>${r.vehiclePlate}</td>
             <td>${r.customerEmail}</td>
-            <td>${r.startDate || ''}</td>
-            <td>${r.endDate || ''}</td>
+            <td>${r.startDate}</td>
+            <td>${r.endDate}</td>
             <td>${r.status}</td>
-            <td>${r.createdAt || ''}</td>
-            <td>${r.updatedAt || ''}</td>
+            <td>${r.createdAt}</td>
+            <td>${r.updatedAt}</td>
             <td>
 	            <button onclick="completeRental('${r.id}')">Complete</button>
 	            <button onclick="cancelRental('${r.id}')">Cancel</button>
@@ -171,11 +171,11 @@ async function filterRentals() {
         const row = `<tr>
             <td>${r.vehiclePlate}</td>
             <td>${r.customerEmail}</td>
-            <td>${r.startDate || ''}</td>
-            <td>${r.endDate || ''}</td>
+            <td>${r.startDate}</td>
+            <td>${r.endDate}</td>
             <td>${r.status}</td>
-            <td>${r.createdAt || ''}</td>
-            <td>${r.updatedAt || ''}</td>
+            <td>${r.createdAt}</td>
+            <td>${r.updatedAt}</td>
             <td>
 	            <button onclick="completeRental('${r.id}')">Complete</button>
 	            <button onclick="cancelRental('${r.id}')">Cancel</button>

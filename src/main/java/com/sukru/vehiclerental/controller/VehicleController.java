@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -99,8 +100,10 @@ public class VehicleController {
             throw new IllegalArgumentException("Plate already exists: " + vehicle.getPlate());
         }
         LocalDateTime now = LocalDateTime.now();
-        vehicle.setCreatedAt(now);
-        vehicle.setUpdatedAt(now);
+        vehicle.setCreatedAt(now.truncatedTo(ChronoUnit.MINUTES));
+        vehicle.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
+        vehicle.setAvailableFrom(vehicle.getAvailableFrom().truncatedTo(ChronoUnit.MINUTES));
+        vehicle.setAvailableTo(vehicle.getAvailableTo().truncatedTo(ChronoUnit.MINUTES));
         return vehicleRepo.save(vehicle);
     }
 
@@ -133,8 +136,10 @@ public class VehicleController {
 
             Vehicle existing = existingOpt.get();
             updated.setId(id);
-            updated.setCreatedAt(existing.getCreatedAt());
-            updated.setUpdatedAt(LocalDateTime.now());
+            updated.setCreatedAt(existing.getCreatedAt().truncatedTo(ChronoUnit.MINUTES));
+            updated.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+            updated.setAvailableFrom(updated.getAvailableFrom().truncatedTo(ChronoUnit.MINUTES));
+            updated.setAvailableTo(updated.getAvailableTo().truncatedTo(ChronoUnit.MINUTES));
 
             return vehicleRepo.save(updated);
         }

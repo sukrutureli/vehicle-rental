@@ -26,10 +26,7 @@ public class Rental {
     @Column(name = "vehicle_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID vehicleId;
     
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime startDate;
-    
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)

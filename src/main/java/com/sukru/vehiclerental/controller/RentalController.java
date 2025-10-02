@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -105,11 +106,13 @@ public class RentalController {
         }
 
         // Kaydet
-        rental.setCreatedAt(now);
-        rental.setUpdatedAt(now);
+        rental.setCreatedAt(now.truncatedTo(ChronoUnit.MINUTES));
+        rental.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
+        rental.setStartDate(rental.getStartDate().truncatedTo(ChronoUnit.MINUTES));
+        rental.setEndDate(rental.getEndDate().truncatedTo(ChronoUnit.MINUTES));
         
         vehicle.setStatus(VehicleStatus.RENTED);
-        vehicle.setUpdatedAt(now);
+        vehicle.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
         vehicleRepo.save(vehicle);
         
         return rentalRepo.save(rental);
@@ -130,7 +133,7 @@ public class RentalController {
 
         Rental rental = rentalOpt.get();
         rental.setStatus(RentalStatus.COMPLETED);
-        rental.setUpdatedAt(now);
+        rental.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
         rentalRepo.save(rental);
 
         // Vehicle durumunu guncelle - AVAILABLE
@@ -138,7 +141,7 @@ public class RentalController {
         if (vehicleOpt.isPresent()) {
             var vehicle = vehicleOpt.get();
             vehicle.setStatus(VehicleStatus.AVAILABLE);
-            vehicle.setUpdatedAt(now);
+            vehicle.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
             vehicleRepo.save(vehicle);
         }
 
@@ -159,7 +162,7 @@ public class RentalController {
 
         Rental rental = rentalOpt.get();
         rental.setStatus(RentalStatus.CANCELLED);
-        rental.setUpdatedAt(now);
+        rental.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
         rentalRepo.save(rental);
 
         // Vehicle durumunu guncelle - AVAILABLE

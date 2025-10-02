@@ -1,4 +1,4 @@
-package com.sukru.vehiclerental.service;
+package com.sukru.vehiclerental;
 
 import com.sukru.vehiclerental.entity.Vehicle;
 import com.sukru.vehiclerental.entity.VehicleLocation;
@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class DummyLocationGenerator {
             newLoc.setVehicleId(vehicle.getId());
             newLoc.setLat(lat);
             newLoc.setLon(lon);
-            newLoc.setReportedAt(LocalDateTime.now());
+            newLoc.setReportedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
 
             locationRepo.save(newLoc);
         }

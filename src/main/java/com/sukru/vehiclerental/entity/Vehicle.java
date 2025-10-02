@@ -43,10 +43,7 @@ public class Vehicle {
     @Enumerated(EnumType.STRING)
     private FuelType fuelType;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime availableFrom;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime availableTo;
     
     private LocalDateTime createdAt;

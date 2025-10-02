@@ -22,7 +22,6 @@ public class VehicleLocation {
     private Double lat;
     private Double lon;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime reportedAt;
     
     @Transient

@@ -79,9 +79,8 @@ async function loadVehicle() {
     const id = params.get("id");
     if (!id) return;
 
-    const response = await fetch(`/api/vehicles`);
-    const data = await response.json();
-    const v = data.find(x => x.id === id);
+    const response = await fetch(`/api/vehicles/${id}`);
+    const v = await response.json();
 
     if (v) {
         document.getElementById('id').value = v.id;
