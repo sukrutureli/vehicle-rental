@@ -4,33 +4,70 @@
     <meta charset="UTF-8">
     <title>Latest Vehicle Locations</title>
     <style>
-        table {
-            border-collapse: collapse;
-            margin-top: 20px;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 6px;
-        }
-        .filter-box {
-            margin-bottom: 15px;
-        }
-        label {
-            margin-right: 5px;
-        }
+        body { 
+		    font-family: Arial, sans-serif; 
+		    margin: 20px; 
+		}
+		h1, h2 { 
+		    color: #333; 
+		}
+		.form-row { 
+		    margin: 8px 0; 
+		}
+		label { 
+		    display: inline-block; 
+		    width: 120px; 
+		    font-weight: bold; 
+		}
+		input, select { 
+		    padding: 5px; 
+		    width: 200px; 
+		}
+		table { 
+		    border-collapse: collapse; 
+		    width: 100%; 
+		    margin-top: 20px; 
+		}
+		th, td { 
+		    border: 1px solid #ccc; 
+		    padding: 6px; 
+		    text-align: left; 
+		}
+		th { 
+		    background-color: #eee; 
+		}
     </style>
 </head>
 <body>
+<h2>Add Vehicle Location</h2>
+
+<form onsubmit="addLocation(); return false;">
+    <div>
+        <label>Vehicle Plate:</label>
+        <input type="text" id="vehiclePlate" required/>
+    </div>
+    <div>
+        <label>Latitude:</label>
+        <input type="number" step="0.0001" id="lat" required/>
+    </div>
+    <div>
+        <label>Longitude:</label>
+        <input type="number" step="0.0001" id="lon" required/>
+    </div>
+    <button type="submit">Submit Location</button>
+</form>
+
+<hr/>
+
 <h2>All Vehicles - Latest Locations</h2>
 
 <div class="filter-box">
     <label>Near Lat:</label>
-    <input type="number" step="0.0001" id="nearLat"/>
+    <input type="number" step="0.0001" id="nearLat"/> <br/>
     <label>Near Lon:</label>
-    <input type="number" step="0.0001" id="nearLon"/>
+    <input type="number" step="0.0001" id="nearLon"/> <br/>
     <label>Radius (km):</label>
-    <input type="number" step="0.1" id="radiusKm"/>
+    <input type="number" step="0.1" id="radiusKm"/> <br/>
     <button onclick="filterLocations()">Filter by Radius</button>
     <button onclick="loadLocations()">Reset</button>
 </div>
@@ -81,7 +118,32 @@
         const params = `?nearLat=${lat}&nearLon=${lon}&radiusKm=${radius}`;
         loadLocations(params);
     }
+	
+    async function addLocation() {
+        const plate = document.getElementById('vehiclePlate').value;
 
+        const vehiclesResp = await fetch('/api/vehicles?plate=' + plate);
+        const vehicles = await vehiclesResp.json();
+        if (vehicles.length === 0) {
+            return;
+        }
+        const vehicleId = vehicles[0].id;
+
+        const loc = {
+            lat: parseFloat(document.getElementById('lat').value),
+            lon: parseFloat(document.getElementById('lon').value)
+        };
+
+        await fetch(`/api/telematics/${vehicleId}/location`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loc)
+        });
+
+        loadLocations();
+    }
+
+    
     window.onload = () => loadLocations();
 </script>
 </body>

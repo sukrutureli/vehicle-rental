@@ -41,6 +41,7 @@ public class VehicleController {
     @GetMapping("/api/vehicles")
     @ResponseBody
     public List<Vehicle> listVehiclesApi(
+            @RequestParam(required = false) String plate,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String model,
             @RequestParam(required = false) String city,
@@ -59,6 +60,7 @@ public class VehicleController {
         
         //Filter
         List<Vehicle> filtered = all.stream()
+                .filter(v -> plate == null || v.getPlate().equalsIgnoreCase(plate))
                 .filter(v -> brand == null || v.getBrand().equalsIgnoreCase(brand))
                 .filter(v -> model == null || v.getModel().equalsIgnoreCase(model))
                 .filter(v -> city == null || v.getCity().equalsIgnoreCase(city))

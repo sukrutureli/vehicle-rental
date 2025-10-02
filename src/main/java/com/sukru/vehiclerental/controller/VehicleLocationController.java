@@ -1,5 +1,6 @@
 package com.sukru.vehiclerental.controller;
 
+import com.sukru.vehiclerental.entity.Vehicle;
 import com.sukru.vehiclerental.entity.VehicleLocation;
 import com.sukru.vehiclerental.repo.VehicleLocationRepo;
 import com.sukru.vehiclerental.repo.VehicleRepo;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -94,6 +97,23 @@ public class VehicleLocationController {
         }
 
         return ResponseEntity.ok(result);
+    }
+    
+    @PostMapping("/api/telematics/{vehicleId}/location")
+    @ResponseBody
+    public VehicleLocation addLocation(@PathVariable UUID vehicleId, 
+    		@RequestBody VehicleLocation location) {
+    	
+    	var vehicleOpt = vehicleRepo.findById(vehicleId);
+    	if (vehicleOpt.isEmpty()) {
+    		throw new IllegalArgumentException("Vehicle not found: " + vehicleId);
+    	}
+    	
+    	location.setVehicleId(vehicleId);
+    	location.setVehiclePlate(vehicleOpt.get().getPlate());
+    	location.setReportedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+    	
+        return locationRepo.save(location);
     }
 
     // Haversine Formula (km cinsinden mesafe)
