@@ -1,4 +1,4 @@
-package com.sukru.vehicle_rental;
+package com.sukru.vehiclerental;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

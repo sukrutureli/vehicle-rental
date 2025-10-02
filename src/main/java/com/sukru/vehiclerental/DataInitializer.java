@@ -65,8 +65,8 @@ public class DataInitializer {
                     v.setStatus(VehicleStatus.AVAILABLE);
 
                     LocalDateTime now = LocalDateTime.now();
-                    v.setAvailableFrom(now.minusDays(1).truncatedTo(ChronoUnit.MINUTES));
-                    v.setAvailableTo(now.plusDays(30).truncatedTo(ChronoUnit.MINUTES));
+                    v.setAvailableFrom(now.plusDays(random.nextInt(4)).truncatedTo(ChronoUnit.MINUTES));
+                    v.setAvailableTo(now.plusDays(4 + random.nextInt(24)).truncatedTo(ChronoUnit.MINUTES));
                     v.setCreatedAt(now.truncatedTo(ChronoUnit.MINUTES));
                     v.setUpdatedAt(now.truncatedTo(ChronoUnit.MINUTES));
 
