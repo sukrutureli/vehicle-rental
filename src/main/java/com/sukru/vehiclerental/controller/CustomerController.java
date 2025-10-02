@@ -35,45 +35,45 @@ public class CustomerController {
     public List<Customer> listApi() {
         return customerRepo.findAll();
     }
-    
+
     @GetMapping("/api/customers/{id}")
     @ResponseBody
     public ResponseEntity<Customer> getCustomerById(@PathVariable UUID id) {
-        var opt = customerRepo.findById(id);
+    	var opt = customerRepo.findById(id);
         if (opt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("Customer not found with id: " + id);
         }
         return ResponseEntity.ok(opt.get());
     }
 
     @PostMapping("/api/customers")
     @ResponseBody
-    public ResponseEntity<?> addApi(@RequestBody Customer customer) {
-    	if (customerRepo.existsByEmail(customer.getEmail())) {
-            return ResponseEntity.badRequest().body("Email already exists: " + customer.getEmail());
+    public Customer addApi(@RequestBody Customer customer) {
+        if (customerRepo.existsByEmail(customer.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + customer.getEmail());
         }
-        return ResponseEntity.ok(customerRepo.save(customer));
+        return customerRepo.save(customer);
     }
 
     // Guncelle
     @PutMapping("/api/customers/{id}")
     @ResponseBody
-    public ResponseEntity<?> updateApi(@PathVariable UUID id, @RequestBody Customer updated) {
+    public Customer updateApi(@PathVariable UUID id, @RequestBody Customer updated) {
         var existingOpt = customerRepo.findById(id);
 
         if (existingOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            var conflict = customerRepo.findByEmail(updated.getEmail())
-                    .filter(c -> !c.getId().equals(id));
-            if (conflict.isPresent()) {
-                return ResponseEntity.badRequest().body("Email already in use by another customer.");
-            }
-
-            updated.setId(id);
-            Customer saved = customerRepo.save(updated);
-            return ResponseEntity.ok(saved);
+            throw new IllegalArgumentException("Customer not found with id: " + id);
         }
+
+        var conflict = customerRepo.findByEmail(updated.getEmail())
+                .filter(c -> !c.getId().equals(id));
+
+        if (conflict.isPresent()) {
+            throw new IllegalArgumentException("Email already in use by another customer.");
+        }
+
+        updated.setId(id);
+        return customerRepo.save(updated);
     }
 
     // Sil
@@ -81,10 +81,9 @@ public class CustomerController {
     @ResponseBody
     public ResponseEntity<Void> deleteApi(@PathVariable UUID id) {
         if (!customerRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        } else {
-            customerRepo.deleteById(id);
-            return ResponseEntity.noContent().build();
+            throw new IllegalArgumentException("Customer not found with id: " + id);
         }
+        customerRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

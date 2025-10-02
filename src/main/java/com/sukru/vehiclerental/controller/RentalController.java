@@ -66,19 +66,19 @@ public class RentalController {
     
     @PostMapping("/api/rentals")
     @ResponseBody
-    public ResponseEntity<?> addApi(@RequestBody Rental rental) {
+    public Rental addApi(@RequestBody Rental rental) {
         LocalDateTime now = LocalDateTime.now();
         
         var vehicleOpt = vehicleRepo.findByPlate(rental.getVehiclePlate());
         var customerOpt = customerRepo.findByEmail(rental.getCustomerEmail());
 
         if (vehicleOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Vehicle not found.");
+        	throw new IllegalArgumentException("Vehicle not found with plate: " + rental.getVehiclePlate());
         }
         var vehicle = vehicleOpt.get();
         
         if (customerOpt.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Customer not found.");
+        	throw new IllegalArgumentException("Customer not found with email: " + rental.getCustomerEmail());
         }
         var customer = customerOpt.get();
         
@@ -87,7 +87,7 @@ public class RentalController {
 
         if (rental.getStartDate().isBefore(vehicle.getAvailableFrom()) ||
             rental.getEndDate().isAfter(vehicle.getAvailableTo())) {
-            return ResponseEntity.badRequest().body("Vehicle is not available in this date range.");
+        	throw new IllegalArgumentException("Vehicle is not available in this date range.");
         }
 
         // Cakisma kontrolu
@@ -99,7 +99,7 @@ public class RentalController {
                      rental.getEndDate().isAfter(existing.getStartDate()));
 
                 if (overlap) {
-                    return ResponseEntity.badRequest().body("Vehicle already rented in this date range.");
+                	throw new IllegalArgumentException("Vehicle already rented in this date range.");
                 }
             }
         }
@@ -112,20 +112,20 @@ public class RentalController {
         vehicle.setUpdatedAt(now);
         vehicleRepo.save(vehicle);
         
-        return ResponseEntity.ok(rentalRepo.save(rental));
+        return rentalRepo.save(rental);
     }
 
     
     // API - Complete
     @PutMapping("/api/rentals/{id}/complete")
     @ResponseBody
-    public ResponseEntity<Rental> completeRental(@PathVariable UUID id) {
+    public Rental completeRental(@PathVariable UUID id) {
     	LocalDateTime now = LocalDateTime.now();
     	
         var rentalOpt = rentalRepo.findById(id);
 
         if (rentalOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("Rental not found with id: " + id);
         }
 
         Rental rental = rentalOpt.get();
@@ -133,7 +133,7 @@ public class RentalController {
         rental.setUpdatedAt(now);
         rentalRepo.save(rental);
 
-        // Vehicle durumunu guncelle → AVAILABLE
+        // Vehicle durumunu guncelle - AVAILABLE
         var vehicleOpt = vehicleRepo.findById(rental.getVehicleId());
         if (vehicleOpt.isPresent()) {
             var vehicle = vehicleOpt.get();
@@ -142,19 +142,19 @@ public class RentalController {
             vehicleRepo.save(vehicle);
         }
 
-        return ResponseEntity.ok(rental);
+        return rental;
     }
 
     // API - Cancel
     @PutMapping("/api/rentals/{id}/cancel")
     @ResponseBody
-    public ResponseEntity<Rental> cancelRental(@PathVariable UUID id) {
+    public Rental cancelRental(@PathVariable UUID id) {
     	LocalDateTime now = LocalDateTime.now();
     	
         var rentalOpt = rentalRepo.findById(id);
 
         if (rentalOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("Rental not found with id: " + id);
         }
 
         Rental rental = rentalOpt.get();
@@ -162,7 +162,7 @@ public class RentalController {
         rental.setUpdatedAt(now);
         rentalRepo.save(rental);
 
-        // Vehicle durumunu guncelle → AVAILABLE
+        // Vehicle durumunu guncelle - AVAILABLE
         var vehicleOpt = vehicleRepo.findById(rental.getVehicleId());
         if (vehicleOpt.isPresent()) {
             var vehicle = vehicleOpt.get();
@@ -171,7 +171,7 @@ public class RentalController {
             vehicleRepo.save(vehicle);
         }
 
-        return ResponseEntity.ok(rental);
+        return rental;
     }
 
 }

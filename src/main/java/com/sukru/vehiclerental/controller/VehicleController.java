@@ -94,14 +94,14 @@ public class VehicleController {
     // Ekle
     @PostMapping("/api/vehicles")
     @ResponseBody
-    public ResponseEntity<?> addVehicleApi(@RequestBody Vehicle vehicle) {
+    public Vehicle addVehicleApi(@RequestBody Vehicle vehicle) {
     	if (vehicleRepo.existsByPlate(vehicle.getPlate())) {
-            return ResponseEntity.badRequest().body("Plate already exists: " + vehicle.getPlate());
+            throw new IllegalArgumentException("Plate already exists: " + vehicle.getPlate());
         }
         LocalDateTime now = LocalDateTime.now();
         vehicle.setCreatedAt(now);
         vehicle.setUpdatedAt(now);
-        return ResponseEntity.ok(vehicleRepo.save(vehicle));
+        return vehicleRepo.save(vehicle);
     }
 
     // Detay
@@ -110,7 +110,7 @@ public class VehicleController {
     public ResponseEntity<Vehicle> getVehicleById(@PathVariable UUID id) {
         var opt = vehicleRepo.findById(id);
         if (opt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("Vehicle not found with id: " + id);
         }
         return ResponseEntity.ok(opt.get());
     }
@@ -118,26 +118,25 @@ public class VehicleController {
     // Guncelle
     @PutMapping("/api/vehicles/{id}")
     @ResponseBody
-    public ResponseEntity<?> updateVehicleApi(@PathVariable("id") UUID id,
+    public Vehicle updateVehicleApi(@PathVariable("id") UUID id,
                                               @RequestBody Vehicle updated) {
         var existingOpt = vehicleRepo.findById(id);
 
         if (existingOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("Vehicle not found with id: " + id);
         } else {
             var conflict = vehicleRepo.findByPlate(updated.getPlate())
                     .filter(v -> !v.getId().equals(id));
             if (conflict.isPresent()) {
-                return ResponseEntity.badRequest().body("Plate already in use by another vehicle.");
+                throw new IllegalArgumentException("Plate already in use by another vehicle.");
             }
 
             Vehicle existing = existingOpt.get();
             updated.setId(id);
-            updated.setCreatedAt(existing.getCreatedAt()); // createdAt sabit
+            updated.setCreatedAt(existing.getCreatedAt());
             updated.setUpdatedAt(LocalDateTime.now());
 
-            Vehicle saved = vehicleRepo.save(updated);
-            return ResponseEntity.ok(saved);
+            return vehicleRepo.save(updated);
         }
     }
 
@@ -146,7 +145,7 @@ public class VehicleController {
     @ResponseBody
     public ResponseEntity<Void> deleteVehicleApi(@PathVariable UUID id) {
         if (!vehicleRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
+        	 throw new IllegalArgumentException("Vehicle not found with id: " + id);
         } else {
             vehicleRepo.deleteById(id);
             return ResponseEntity.noContent().build();

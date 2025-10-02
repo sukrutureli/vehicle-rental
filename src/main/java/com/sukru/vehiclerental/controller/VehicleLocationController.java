@@ -31,11 +31,11 @@ public class VehicleLocationController {
     // Tek aracin son konumu
     @GetMapping("/api/vehicles/{id}/location/latest")
     @ResponseBody
-    public ResponseEntity<VehicleLocation> getLatestLocation(@PathVariable UUID id) {
+    public VehicleLocation getLatestLocation(@PathVariable UUID id) {
         Optional<VehicleLocation> optLocation = locationRepo.findTopByVehicleIdOrderByReportedAtDesc(id);
 
         if (optLocation.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        	throw new IllegalArgumentException("No location found for vehicle id: " + id);
         }
 
         VehicleLocation location = optLocation.get();
@@ -44,7 +44,7 @@ public class VehicleLocationController {
             location.setVehiclePlate(vehicle.getPlate());
         });
 
-        return ResponseEntity.ok(location);
+        return location;
     }
 
     // Tum araclarin son konumu
