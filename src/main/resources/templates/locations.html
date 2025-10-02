@@ -13,10 +13,27 @@
             border: 1px solid #ccc;
             padding: 6px;
         }
+        .filter-box {
+            margin-bottom: 15px;
+        }
+        label {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
 <h2>All Vehicles - Latest Locations</h2>
+
+<div class="filter-box">
+    <label>Near Lat:</label>
+    <input type="number" step="0.0001" id="nearLat"/>
+    <label>Near Lon:</label>
+    <input type="number" step="0.0001" id="nearLon"/>
+    <label>Radius (km):</label>
+    <input type="number" step="0.1" id="radiusKm"/>
+    <button onclick="filterLocations()">Filter by Radius</button>
+    <button onclick="loadLocations()">Reset</button>
+</div>
 
 <table>
     <thead>
@@ -33,8 +50,8 @@
 <a th:href="@{/}">Back to Index</a>
 
 <script>
-    async function loadLocations() {
-        const response = await fetch('/api/vehicles/locations/latest');
+    async function loadLocations(params = "") {
+        const response = await fetch('/api/vehicles/locations/latest' + params);
         const data = await response.json();
 
         const table = document.getElementById('locationsTable');
@@ -51,7 +68,21 @@
         });
     }
 
-    window.onload = loadLocations;
+    async function filterLocations() {
+        const lat = document.getElementById('nearLat').value;
+        const lon = document.getElementById('nearLon').value;
+        const radius = document.getElementById('radiusKm').value;
+
+        if (!lat || !lon || !radius) {
+            alert("Please fill all fields for radius filter!");
+            return;
+        }
+
+        const params = `?nearLat=${lat}&nearLon=${lon}&radiusKm=${radius}`;
+        loadLocations(params);
+    }
+
+    window.onload = () => loadLocations();
 </script>
 </body>
 </html>

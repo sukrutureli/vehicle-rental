@@ -50,14 +50,18 @@ public class VehicleLocationController {
     // Tum araclarin son konumu
     @GetMapping("/api/vehicles/locations/latest")
     @ResponseBody
-    public ResponseEntity<List<VehicleLocation>> getLatestLocationsForAllVehicles() {
+    public ResponseEntity<List<VehicleLocation>> getLatestLocationsForAllVehicles(
+            @RequestParam(required = false) Double nearLat,
+            @RequestParam(required = false) Double nearLon,
+            @RequestParam(required = false) Double radiusKm) {
+
         List<VehicleLocation> all = locationRepo.findAll();
 
         if (all.isEmpty()) {
             return ResponseEntity.ok(Collections.emptyList());
         }
 
-        // Her vehicleId icin en guncel location
+        // En güucel konumlar
         Map<UUID, VehicleLocation> latestByVehicle = new HashMap<>();
         for (VehicleLocation loc : all) {
             UUID vehicleId = loc.getVehicleId();
@@ -71,13 +75,40 @@ public class VehicleLocationController {
             }
         }
 
-        latestByVehicle.values().forEach(loc -> {
-            vehicleRepo.findById(loc.getVehicleId()).ifPresent(vehicle -> {
-                loc.setVehiclePlate(vehicle.getPlate());
-            });
-        });
+        // Plate bilgisi ekle
+        latestByVehicle.values().forEach(loc ->
+            vehicleRepo.findById(loc.getVehicleId())
+                       .ifPresent(vehicle -> loc.setVehiclePlate(vehicle.getPlate()))
+        );
 
-        return ResponseEntity.ok(new ArrayList<>(latestByVehicle.values()));
+        List<VehicleLocation> result = new ArrayList<>(latestByVehicle.values());
+
+        // Eger radius parametreleri verilmisse filtrele
+        if (nearLat != null && nearLon != null && radiusKm != null) {
+            result = result.stream()
+                    .filter(loc -> {
+                        double distance = haversine(nearLat, nearLon, loc.getLat(), loc.getLon());
+                        return distance <= radiusKm;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return ResponseEntity.ok(result);
     }
+
+    // Haversine Formula (km cinsinden mesafe)
+    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS = 6371; // km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return EARTH_RADIUS * c;
+    }
+
 
 }
